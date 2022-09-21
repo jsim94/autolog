@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<link rel="stylesheet" href="static/styles.css">
+
+<nav class="navbar navbar-expand-lg fixed-top navbar-dark bg-primary">
+  <div class="container-fluid container-lg">
+    <a class="navbar-brand" href="/">Modlog</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarText">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse " id="navbarText">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0 justify-content-end">
+        <li class="nav-item">
+          <a class="nav-link active" href="{{ url_for('project.new') }}">New Project</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{{ url_for('profile.show',username=current_user.username) }}">Profile</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{{ url_for('logout') }}">Logout</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<main class="container min-vh-100 bg-white" style="padding-top: 80px;">
+  <div class="mx-2 mx-lg-4">
+    {% block subcontent %}
+    {% endblock %}
+  </div>
+</main>
+
+{% endblock %}

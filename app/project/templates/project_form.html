@@ -1,0 +1,70 @@
+{% extends 'site_base.html' %}
+
+{% block title %}{% endblock %}
+
+{% block subcontent %}
+<h1>New Project</h1>
+
+
+<form method='post'>
+  <div class="row mt-4">
+
+    <div class="col-12 col-lg-5 mb-3">
+      {% for hidden_field in form if hidden_field.widget.input_type == 'hidden' %}
+      {{ hidden_field() }}
+      {% endfor %}
+
+      <div class="row justify-content-between mb-2">
+        <div class="col-auto">
+          <label for="year" class="form-label">Year</label>
+        </div>
+        <div class="col-9">
+          <select name="year" id="year" class="form-select"></select>
+        </div>
+      </div>
+      <div class="row justify-content-between mb-2">
+        <div class="col-auto">
+          <label for="make" class="form-label">Make</label>
+        </div>
+        <div class="col-9">
+          <select name="make" id="make" class="form-select"></select>
+        </div>
+      </div>
+      <div class="row justify-content-between mb-2">
+        <div class="col-auto">
+          <label for="model" class="form-label">Model</label>
+        </div>
+        <div class="col-9">
+          <select name="model" id="model" class="form-select"></select>
+        </div>
+      </div>
+      <div class="row justify-content-between mb-2">
+        <div class="col-auto">
+          <label for="trim" class="form-label">Trim</label>
+        </div>
+        <div class="col-9">
+          <select name="trim" id="trim" class="form-select"></select>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12 col-lg-7">
+      {% for field in form if field.widget.input_type != 'hidden' %}
+      <div class="row justify-content-between mb-2">
+        <div class="col-auto ms-lg-3">
+          {{ field.label(class="form-label")}}
+        </div>
+        <div class="col-lg-8 text-start">
+          {{ field(class="w-100") }}
+        </div>
+      </div>
+      {% endfor %}
+
+      <input type="submit" value="Add Project Car" class="btn btn-success float-end mb-5">
+    </div>
+
+  </div>
+</form>
+
+<script src="static/populate_select_fields.js"></script>
+{% endblock %}
