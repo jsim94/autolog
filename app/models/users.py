@@ -101,6 +101,23 @@ class User(UserMixin, uuid_pk, db.Model):
                 return user
         return
 
+    def update(self, username, old_password, new_password, email):
+        ''' Validates password and updates user profile. Returns user if update is successful'''
+        if not self.validate_password(old_password):
+            return
+
+        self.username = username
+        self.password = bcrypt.generate_password_hash(
+            new_password).decode('UTF-8')
+        self.email = email
+
+        try:
+            db.session.commit()
+        except IntegrityError:
+            db.session.rollback()
+            return
+        return self
+
     def logout(self):
         '''Logsout current_user'''
         logout_user()

@@ -21,13 +21,15 @@ class UserForm(LoginForm, FlaskForm):
     """Form for user signup"""
 
     email = StringField('E-mail', validators=[InputRequired(), Email()])
-    password = PasswordField('Password', validators=[InputRequired(), Length(min=8, max=32), EqualTo(
+    password = PasswordField('New Password', validators=[InputRequired(), Length(min=8, max=32), EqualTo(
         'confirm', message='Passwords must match')])
-    confirm = PasswordField('Repeat Password')
+    confirm = PasswordField('Repeat New Password')
 
 
 class UserUpdate(UserForm, FlaskForm):
     '''Form for user update'''
+
+    old_password = PasswordField('Old Password')
 
 
 class NewProjectForm(FlaskForm):
