@@ -22,7 +22,13 @@ def load_user(user_id):
     '''Get logged in user before request. Also updates last login time for user'''
     user = User.get_by_uuid(user_id)
     if user:
+
         user.update_login_time()
+        try:
+            db.session.commit()
+        except Exception as e:
+            print('ERROR WHEN UPDATING USER LOGIN', str(e))
+            db.session.rollback()
     return user
 
 
