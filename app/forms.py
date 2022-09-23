@@ -35,18 +35,25 @@ class UserUpdate(UserForm, FlaskForm):
 class NewProjectForm(FlaskForm):
     '''Form for submitting new project car'''
 
-    model_id = HiddenField('model_id', validators=[])
-    name = StringField('Project Name', validators=[Length(max=32)])
+    year = HiddenField('year')
+    make = HiddenField('make')
+    model = HiddenField('model')
+    model_id = HiddenField('model_id')
+    name = StringField('Project Name', validators=[
+                       InputRequired(), Length(max=32)])
     description = StringField('Description', validators=[
-                              Length(max=500)], widget=TextArea())
-    private = RadioField('Visibility', default=1,
-                         choices=PrivacyStatus.choices, coerce=PrivacyStatus.coerce)
+        Length(max=500)], widget=TextArea())
+    private = RadioField('Visibility', default='PUBLIC',
+                         choices=PrivacyStatus.choices)
 
     horsepower = IntegerField('Horsepower', default=0)
     torque = IntegerField('Torque(ft/lb)', default=0)
     weight = IntegerField('Weight(lb)', default=0)
-    drivetrain = SelectField('Drivetrain', choices=Drivetrain.choices,
-                             coerce=Drivetrain.coerce)
+    drivetrain = SelectField('Drivetrain', choices=Drivetrain.choices)
     engine_size = DecimalField('Engine Size(L)')
 
     # WIP - pictures = MultipleFileField()
+
+
+class DeleteProject(FlaskForm):
+    '''Form for deleting a project. Strictly for ensuring the request comes from a validated form via CSRF token'''

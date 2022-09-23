@@ -9,23 +9,19 @@ class FormEnum():
     def choices(cls):
         return [(choice, choice.name) for choice in cls]
 
-    @classmethod
-    def coerce(cls, choice):
-        return cls(int(choice)) if not isinstance(choice, cls) else choice
-
     def __str__(self):
         return str(self.value)
 
 
 class PrivacyStatus(FormEnum, Enum):
     '''Choices for friendship status'''
-    PUBLIC = 1
-    PRIVATE = 2
-    UNLISTED = 3
+    PUBLIC = 'PUBLIC'
+    PRIVATE = 'PRIVATE'
+    UNLISTED = 'UNLISTED'
 
 
 class Drivetrain(FormEnum, Enum):
     '''Choices for drivetrain'''
-    FWD = 1
-    RWD = 2
-    AWD = 3
+    FWD = 'FWD'
+    RWD = 'RWD'
+    AWD = 'AWD'

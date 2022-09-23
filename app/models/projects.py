@@ -31,7 +31,7 @@ class Project(uuid_pk, timestamps, db.Model):
     weight = db.Column(db.Integer)
     drivetrain = db.Column(ENUM(Drivetrain))
     w2p = db.Column(db.Float)
-    engine_size = db.Column(db.Integer)
+    engine_size = db.Column(db.Float)
 
     pictures = db.relationship('ProjectPicture', backref='project')
     followers = db.relationship(

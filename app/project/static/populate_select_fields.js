@@ -1,8 +1,11 @@
 const BASE_API_URL = "https://www.carqueryapi.com/api/0.3/?callback=?";
-const YEAR_FIELD = $("#year");
-const MAKE_FIELD = $("#make");
-const MODEL_FIELD = $("#model");
-const TRIM_FIELD = $("#trim");
+const HIDDEN_YEAR = $("#year");
+const HIDDEN_MAKE = $("#make");
+const HIDDEN_MODEL = $("#model");
+const YEAR_FIELD = $("#year-select");
+const MAKE_FIELD = $("#make-select");
+const MODEL_FIELD = $("#model-select");
+const TRIM_FIELD = $("#trim-select");
 const MODEL_ID_FIELD = $("#model_id");
 const HP_FIELD = $("#horsepower");
 const TORQUE_FIELD = $("#torque");
@@ -31,20 +34,26 @@ class CarQuery {
   trimChange() {
     this.model_obj = this.trims.find((val) => val.value == TRIM_FIELD.val());
     console.log(this.model_obj);
+
+    HIDDEN_YEAR.val(this.model_obj.model_year);
+    HIDDEN_MAKE.val(this.model_obj.model_make_display);
+    HIDDEN_MODEL.val(this.model_obj.model_name);
     MODEL_ID_FIELD.val(this.model_obj.model_id);
-    HP_FIELD.val(parseInt(this.model_obj.model_engine_power_ps * 0.986));
-    TORQUE_FIELD.val(parseInt(this.model_obj.model_engine_torque_nm * 0.73756));
-    WEIGHT_FIELD.val(parseInt(this.model_obj.model_weight_kg));
-    ENGINE_FIELD.val(Math.round(this.model_obj.model_engine_cc / 100) / 10);
+    HP_FIELD.val(parseInt(this.model_obj.model_engine_power_ps ? this.model_obj.model_engine_power_ps * 0.986 : 0));
+    TORQUE_FIELD.val(this.model_obj.model_engine_torque_nm ? parseInt(this.model_obj.model_engine_torque_nm * 0.73756) : 0);
+    WEIGHT_FIELD.val(this.model_obj.model_weight_kg ? parseInt(this.model_obj.model_weight_kg) : 0);
+    ENGINE_FIELD.val(this.model_obj.model_engine_cc ? Math.round(this.model_obj.model_engine_cc / 100) / 10 : 0);
 
     let drive = this.model_obj.model_drive.toLowerCase();
 
     if (drive.includes("front")) {
-      drive = "1";
+      drive = "FWD";
     } else if (drive.includes("rear")) {
-      drive = "2";
+      drive = "RWD";
     } else if (drive.includes("all") || drive.includes("4wd") || drive.includes("awd")) {
-      drive = "3";
+      drive = "AWD";
+    } else {
+      drive = "FWD";
     }
     DRIVETRAIN_FIELD.val(drive);
   }
@@ -114,7 +123,7 @@ class CarQuery {
     const response = await this.callApi("getTrims", this.year, this.make, this.model);
     const trimList = [];
 
-    for (trim of response.Trims) {
+    for (let trim of response.Trims) {
       trimList.push({ value: trim.model_id, display: trim.model_trim ? trim.model_trim : "Default", ...trim });
     }
     this.trims = trimList;
