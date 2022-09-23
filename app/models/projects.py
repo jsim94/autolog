@@ -41,7 +41,10 @@ class Project(uuid_pk, timestamps, db.Model):
 
     def calc_weight_to_power(self):
         '''Return weight to power ratio rounded to two digits'''
-        return round((self.weight / self.horsepower), 2)
+        try:
+            return round((self.weight / self.horsepower), 2)
+        except ZeroDivisionError:
+            return 0
 
     w2p = property(calc_weight_to_power)
 
