@@ -37,6 +37,9 @@
 
 <main class="container min-vh-100 bg-white" style="padding-top: 80px;">
   <div class="mx-2 mx-lg-4">
+    {% for category, message in get_flashed_messages(with_categories=True) %}
+    <div class="alert alert-{{ category }}">{{ message }}</div>
+    {% endfor %}
     {% block subcontent %}
     {% endblock %}
   </div>
