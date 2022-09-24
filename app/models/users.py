@@ -2,6 +2,7 @@
 
 from datetime import datetime
 
+from flask import g
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.dialects.postgresql import ENUM
 from flask_bcrypt import Bcrypt
@@ -19,16 +20,18 @@ bcrypt = Bcrypt()
 
 @lm.user_loader
 def load_user(user_id):
-    '''Get logged in user before request. Also updates last login time for user'''
+    '''Get logged in user before request. Also adds user to flask global and updates last login time for user'''
     user = User.get_by_uuid(user_id)
     if user:
-
+        g.current_user = user
         user.update_login_time()
         try:
             db.session.commit()
         except Exception as e:
             print('ERROR WHEN UPDATING USER LOGIN', str(e))
             db.session.rollback()
+    else:
+        g.current_user = None
     return user
 
 
