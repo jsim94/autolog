@@ -17,6 +17,7 @@ class ProjectPicture(uuid_pk, timestamps, db.Model):
     '''Model for pictures that are attached to projects'''
     __tablename__ = 'project_pictures'
 
-    project_id = db.Column(db.Integer, db.ForeignKey(
+    image_name = db.Column(db.Text, nullable=False)
+    project_pk = db.Column(db.Integer, db.ForeignKey(
         'projects.pk', ondelete="cascade"), nullable=False)
     description = db.Column(db.String(120))

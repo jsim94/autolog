@@ -1,6 +1,6 @@
 # app > project > route.py
 
-from flask import render_template, request, redirect, url_for
+from flask import render_template, request, redirect, url_for, g, flash, abort
 from flask_login import current_user, login_required
 
 from . import bp
@@ -12,15 +12,24 @@ from app.bcolors import bcolors
 from app import project
 
 
-@bp.route('/<project_id>')
+@bp.url_value_preprocessor
+def get_project_object(endpoint, values):
+    g.project = Project.get_by_uuid(uuid=values.get(
+        'project_id'))
+
+
+@ bp.route('/<project_id>')
 def show(project_id):
     '''Retreives the page for the project car if found and if the requesting client has access to the page.'''
-    project = Project.get_by_uuid(project_id)
-    return render_template('project.html', project=project)
+
+    if not g.project:
+        abort(404)
+
+    return render_template('project.html')
 
 
-@bp.route('/new', methods=['GET', 'POST'])
-@login_required
+@ bp.route('/new', methods=['GET', 'POST'])
+@ login_required
 def new():
     '''GET returns new project page and POST submits new project'''
     form = NewProjectForm()
@@ -31,10 +40,9 @@ def new():
         model_id = form.model_id.data
         private = form.private.data
 
-        year = request.form.get('year')
-        make = request.form.get('make')
-        model = request.form.get('model')
-
+        year = form.year.data
+        make = form.make.data
+        model = form.model.data
         horsepower = form.horsepower.data
         torque = form.torque.data
         weight = form.weight.data
@@ -59,3 +67,37 @@ def new():
         return redirect(url_for('project.show', project_id=project.id))
 
     return render_template('project_form.html', form=form)
+
+
+@bp.route('/<project_id>/edit', methods=['GET', 'POST'])
+@login_required
+def edit(project_id):
+    '''GET returns a project edit page and POST will update project'''
+
+    # TO BE IMPLEMENTED
+    form = ''
+
+    if form.validate_on_submit():
+
+        if project:
+            flash('Project successfully updated')
+            return redirect(url_for('project.show', project_id=project.id))
+        flash('Error occurred')
+
+    return render_template('edit.html', form=form, user=current_user)
+
+
+@bp.route('/<project_id>/delete', methods=['DELETE'])
+@login_required
+def delete(project_id):
+    '''Deletes project from database'''
+
+    if not g.project.user == current_user:
+        abort(403)
+
+    if g.project.delete():
+        flash('Project deleted')
+        return redirect(url_for('profile.show',))
+    flash('Error Occured')
+
+    return redirect(url_for('project.show', project_id=project_id))

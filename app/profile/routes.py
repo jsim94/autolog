@@ -38,6 +38,7 @@ def show(username):
 def edit():
     '''GET returns a profile edit page and POST will update profile'''
     form = UserUpdate(obj=current_user)
+
     if form.validate_on_submit():
         username = form.username.data
         old_password = form.old_password.data
@@ -54,7 +55,6 @@ def edit():
         if user:
             flash('Profile successfully updated')
             return redirect(url_for('profile.show', username=user.username))
-
         flash('Error occurred')
 
     return render_template('edit.html', form=form, user=current_user)
