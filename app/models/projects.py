@@ -17,14 +17,14 @@ class Project(uuid_pk, timestamps, db.Model):
     private = db.Column(ENUM(PrivacyStatus), nullable=False,
                         server_default="PUBLIC")
 
-    model_id = db.Column(db.Integer)
+    model_id = db.Column(db.Integer, nullable=True)
     name = db.Column(db.String(30))
     description = db.Column(db.String(500))
     mods = db.Column(ARRAY(db.String(50)))
 
-    year = db.Column(db.Integer)
-    make = db.Column(db.Text)
-    model = db.Column(db.Text)
+    year = db.Column(db.Text, nullable=True)
+    make = db.Column(db.Text, nullable=True)
+    model = db.Column(db.Text, nullable=True)
 
     horsepower = db.Column(db.Integer)
     torque = db.Column(db.Integer)
@@ -56,7 +56,7 @@ class Project(uuid_pk, timestamps, db.Model):
             user_pk=user_pk,
             name=name,
             description=description,
-            model_id=model_id,
+            model_id=model_id if model_id else -1,
             private=private,
             year=year,
             make=make,
@@ -67,6 +67,7 @@ class Project(uuid_pk, timestamps, db.Model):
             drivetrain=drivetrain,
             engine_size=engine_size
         )
+
         try:
             db.session.add(project)
             db.session.commit()
@@ -84,6 +85,15 @@ class Project(uuid_pk, timestamps, db.Model):
     def get_by_uuid(cls, uuid):
         '''Get user object by uuid search or return none.'''
         return cls.query.filter_by(id=uuid).first()
+
+    def delete(self, current_user):
+        '''Check auth of user and either return 403 or 200'''
+        if not self.user == current_user:
+            return 403
+
+        db.session.delete(self)
+        db.session.commit()
+        return 200
 
     def __repr__(self):
         return '<Project %r>' % self.name

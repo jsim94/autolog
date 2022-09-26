@@ -50,7 +50,7 @@ class NewProjectForm(FlaskForm):
     torque = IntegerField('Torque(ft/lb)', default=0)
     weight = IntegerField('Weight(lb)', default=0)
     drivetrain = SelectField('Drivetrain', choices=Drivetrain.choices)
-    engine_size = DecimalField('Engine Size(L)')
+    engine_size = DecimalField('Engine Size(L)', default=0)
 
     # WIP - pictures = MultipleFileField()
 

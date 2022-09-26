@@ -87,17 +87,19 @@ def edit(project_id):
     return render_template('edit.html', form=form, user=current_user)
 
 
-@bp.route('/<project_id>/delete', methods=['DELETE'])
+@bp.route('/<project_id>/delete')
 @login_required
 def delete(project_id):
     '''Deletes project from database'''
 
-    if not g.project.user == current_user:
+    status = g.project.delete(current_user=current_user)
+
+    if status == 403:
         abort(403)
 
-    if g.project.delete():
-        flash('Project deleted')
-        return redirect(url_for('profile.show',))
-    flash('Error Occured')
+    if status == 200:
+        flash('Project deleted', 'info')
+        return redirect(url_for('profile.show', username=g.project.user.username))
 
-    return redirect(url_for('project.show', project_id=project_id))
+    flash('Error Occured')
+    return redirect(url_for('profile.show', project_id=project_id))
