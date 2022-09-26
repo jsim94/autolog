@@ -4,17 +4,28 @@
 
 {% block subcontent %}
 
+{% if g.user == g.current_user %}
+{% set owner = true %}
+{% endif %}
+
 <div class="row g-5">
   <div class="d-flex justify-content-lg-center col-12 col-lg-3 mb-4">
     <div class="d-block ms-lg-0 mb-3" style="height:200px; border-radius: 25%;">
       <img src="{{ url_for('static', filename='assets/profile_pictures/'~g.user.profile_picture) }}" alt=""
         class=".img-fluid " style="height:200px; border-radius: 25%;">
       <h3>{{ g.user.username }}</h3>
-      <a href="{{ url_for('profile.edit') }}" class="btn btn-primary btn-sm">Profile Edit</a>
+      {% if owner %}
+      <a href="{{ url_for('profile.edit') }}" class="btn btn-primary btn-sm">Profile Edit
+      </a>
+      {% endif %}
     </div>
   </div>
   <div class="col-12 col-lg-9">
     <h1 class="mb-3">Projects</h1>
+    {% if owner %}
+    <a class="btn btn-primary btn-sm" href="{{ url_for('project.new') }}">New Project</a>
+    {% endif %}
+
     {% for project in g.user.projects %}
     <div class="mb-2">
       <a href="{{ url_for('project.show', project_id=project.id) }}" class="text-reset text-decoration-none">
