@@ -3,7 +3,7 @@
 from flask_wtf import FlaskForm
 from wtforms import HiddenField, SelectField, StringField, IntegerField, DecimalField, PasswordField, RadioField, MultipleFileField
 from wtforms.validators import InputRequired, Email, EqualTo, Length
-from wtforms.widgets import TextArea
+from wtforms.widgets import TextArea, TextInput
 
 from app.models.enums import Drivetrain, PrivacyStatus
 
@@ -28,7 +28,6 @@ class UserForm(LoginForm, FlaskForm):
 
 class UserUpdate(UserForm, FlaskForm):
     '''Form for user update'''
-
     old_password = PasswordField('Old Password')
 
 
@@ -55,5 +54,8 @@ class NewProjectForm(FlaskForm):
     # WIP - pictures = MultipleFileField()
 
 
-class DeleteProject(FlaskForm):
-    '''Form for deleting a project. Strictly for ensuring the request comes from a validated form via CSRF token'''
+class EditProjectForm(NewProjectForm, FlaskForm):
+    '''Form for editing a project car'''
+    year = IntegerField('Year', widget=TextInput())
+    make = StringField('Make', validators=[Length(max=40)])
+    model = StringField('Model', validators=[Length(max=40)])

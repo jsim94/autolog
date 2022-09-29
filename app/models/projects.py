@@ -3,7 +3,7 @@
 from sqlalchemy.dialects.postgresql import ARRAY, ENUM
 from sqlalchemy.exc import IntegrityError
 
-from app import db
+from app import db, bcolors
 from .mixins import uuid_pk, timestamps
 from .enums import PrivacyStatus, Drivetrain
 
@@ -86,9 +86,21 @@ class Project(uuid_pk, timestamps, db.Model):
         '''Get user object by uuid search or return none.'''
         return cls.query.filter_by(id=uuid).first()
 
+    def check_is_owner(self, current_user):
+        ''''''
+        return True if self.user == current_user else False
+
+    def update(self):
+        ''''''
+        if not self.check_is_owner:
+            return 403
+
+        db.session.commit()
+        return 200
+
     def delete(self, current_user):
         '''Check auth of user and either return 403 or 200'''
-        if not self.user == current_user:
+        if not self.check_is_owner:
             return 403
 
         db.session.delete(self)

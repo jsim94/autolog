@@ -1,0 +1,37 @@
+{% extends 'site_base.html' %}
+
+{% block title %}Modlog - Edit{% endblock %}
+
+{% block subcontent %}
+<h1>Edit Project</h1>
+
+
+
+<div class="row mt-4">
+
+  <div class="col-12 col-lg-7">
+    <form method='post'>
+      {% for hidden_field in form if hidden_field.widget.input_type == 'hidden' %}
+      {{ hidden_field() }}
+      {% endfor %}
+      {% for field in form if field.widget.input_type != 'hidden' %}
+      <div class="row justify-content-between mb-2">
+        <div class="col-auto ms-lg-3">
+          {{ field.label(class="form-label")}}
+        </div>
+        <div class="col-lg-8 text-start">
+          {{ field(class="w-100") }}
+          {% for error in field.errors %}
+          {{ error }}
+          {% endfor %}
+        </div>
+
+      </div>
+      {% endfor %}
+
+      <input type="submit" value="Add Project Car" class="btn btn-success float-end mb-5">
+    </form>
+  </div>
+
+</div>
+{% endblock %}

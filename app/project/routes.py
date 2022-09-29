@@ -73,18 +73,21 @@ def new():
 @login_required
 def edit(project_id):
     '''GET returns a project edit page and POST will update project'''
-
-    # TO BE IMPLEMENTED
-    form = ''
+    form = EditProjectForm(obj=g.project)
 
     if form.validate_on_submit():
+        form.populate_obj(g.project)
+        status = g.project.update()
 
-        if project:
-            flash('Project successfully updated')
-            return redirect(url_for('project.show', project_id=project.id))
+        if status == 403:
+            abort(403)
+
+        if status == 200:
+            flash('Project successfully updated', 'info')
+            return redirect(url_for('project.show', project_id=project_id))
         flash('Error occurred')
 
-    return render_template('edit.html', form=form, user=current_user)
+    return render_template('project_edit.html', form=form, user=current_user)
 
 
 @bp.route('/<project_id>/delete')
