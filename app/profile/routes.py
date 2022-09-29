@@ -57,4 +57,4 @@ def edit():
             return redirect(url_for('profile.show', username=user.username))
         flash('Error occurred')
 
-    return render_template('edit.html', form=form, user=current_user)
+    return render_template('profile_edit.html', form=form, user=current_user)

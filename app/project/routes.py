@@ -66,7 +66,7 @@ def new():
         )
         return redirect(url_for('project.show', project_id=project.id))
 
-    return render_template('project_form.html', form=form)
+    return render_template('project_new.html', form=form)
 
 
 @bp.route('/<project_id>/edit', methods=['GET', 'POST'])
