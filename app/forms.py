@@ -59,3 +59,8 @@ class EditProjectForm(NewProjectForm, FlaskForm):
     year = IntegerField('Year', widget=TextInput())
     make = StringField('Make', validators=[Length(max=40)])
     model = StringField('Model', validators=[Length(max=40)])
+
+
+class AddModForm(FlaskForm):
+    '''Form for adding a mod to a project'''
+    mod = StringField('mod', validators=[Length(max=50)])

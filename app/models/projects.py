@@ -1,11 +1,15 @@
 # app > models > projects.py
 
 from sqlalchemy.dialects.postgresql import ARRAY, ENUM
+from sqlalchemy.ext.mutable import MutableList
 from sqlalchemy.exc import IntegrityError
+from flask_login import current_user
 
-from app import db, bcolors
+from app import db
 from .mixins import uuid_pk, timestamps
 from .enums import PrivacyStatus, Drivetrain
+
+from app.bcolors import bcolors
 
 
 class Project(uuid_pk, timestamps, db.Model):
@@ -16,11 +20,10 @@ class Project(uuid_pk, timestamps, db.Model):
         'users.pk', ondelete="cascade"), nullable=False)
     private = db.Column(ENUM(PrivacyStatus), nullable=False,
                         server_default="PUBLIC")
-
     model_id = db.Column(db.Integer, nullable=True)
     name = db.Column(db.String(30))
     description = db.Column(db.String(500))
-    mods = db.Column(ARRAY(db.String(50)))
+    mods = db.Column(MutableList.as_mutable(ARRAY(db.String(50))), default=[])
 
     year = db.Column(db.Text, nullable=True)
     make = db.Column(db.Text, nullable=True)
@@ -86,25 +89,53 @@ class Project(uuid_pk, timestamps, db.Model):
         '''Get user object by uuid search or return none.'''
         return cls.query.filter_by(id=uuid).first()
 
-    def check_is_owner(self, current_user):
-        ''''''
-        return True if self.user == current_user else False
+    def owner_required(func):
+        '''Decorator that checks if flask_login.current_user is the user of the project'''
 
-    def update(self):
-        ''''''
-        if not self.check_is_owner:
-            return 403
+        def inner(self, *args, **kwargs):
+            return func(self, *args, **kwargs) if self.user == current_user else 403
+        return inner
 
+    @owner_required
+    def update(self, owner):
+        '''Method to take in updates to a project and commit them to the database. 
+        --
+        At this time all this does is commit the update to the database. The actual update is handled in project/routes.py with 'form.populate_obj()' --
+        '''
         db.session.commit()
         return 200
 
-    def delete(self, current_user):
-        '''Check auth of user and either return 403 or 200'''
-        if not self.check_is_owner:
-            return 403
+    @owner_required
+    def add_mod(self, mod):
+        '''Add mod to projects mod list'''
+        try:
+            self.mods.append(mod)
+            db.session.commit()
+        except:
+            return 500
 
-        db.session.delete(self)
-        db.session.commit()
+        return 200
+
+    @owner_required
+    def delete_mod(self, index):
+        '''Takes index of mod to delete and deletes it from project.mods'''
+        try:
+            self.mods.pop(index)
+            db.session.commit()
+        except IndexError:
+            return 404
+        except:
+            return 500
+        return 200
+
+    @owner_required
+    def delete(self):
+        '''Check auth of user and either return 403 or 200'''
+        try:
+            db.session.delete(self)
+            db.session.commit()
+        except:
+            return 500
         return 200
 
     def __repr__(self):
