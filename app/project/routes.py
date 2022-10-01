@@ -14,14 +14,13 @@ from app.bcolors import bcolors
 @bp.url_value_preprocessor
 def get_project_object(endpoint, values):
     '''Gets the project object from database and adds it and the users ownership status to flask global'''
-    g.project = Project.get_by_uuid(uuid=values.get(
-        'project_id'))
-    if not g.project:
-        if not endpoint == 'project.new':
-            abort(404)
+    try:
+        g.project = Project.get_by_uuid(uuid=values['project_id'])
+        g.owner = True if g.project.user == current_user else False
+    except KeyError:
         return
-    elif g.project.user == current_user:
-        g.owner = True
+    if not g.project:
+        abort(404)
 
 
 def owner_required(func):
