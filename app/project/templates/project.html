@@ -4,12 +4,13 @@
 
 {% block subcontent %}
 
-{% if g.project.user == g.current_user %}
-{% set owner = true %}
+<link rel="stylesheet" href="{{ url_for('.static',filename='styles.css') }}">
+{% if g.owner %}
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css"
   integrity="sha512-xh6O/CkQoPOWDdYTDqeRdPCVd1SpvCA9XXcUnZS2FmJNp1coAFzvtCN9BmamE+4aHK8yyUHUSCcJHgXloTyT2A=="
   crossorigin="anonymous" referrerpolicy="no-referrer" />
 {% endif %}
+
 
 <div class="row">
 
@@ -49,7 +50,7 @@
         {% endfor %}
         {% endif %}
 
-        {% if owner %}
+        {% if g.owner %}
         <div class="col-xl-3 col-4">
           <a href="#">
             <img class="img-thumbnail w-100" data-bs-target="" data-bs-slide-to="" src="
@@ -64,7 +65,7 @@
   <div class="col-lg-6 col-12">
     <h1 class="d-inline">{{ g.project.name }} </h1>
 
-    {% if owner %}
+    {% if g.owner %}
 
     <a class="btn btn-sm btn-warning" href="{{ url_for('project.edit', project_id=g.project.id) }}">Edit</a>
     <button class="btn btn-sm btn-danger" data-bs-target="#deleteModal" data-bs-toggle="modal">Delete</button>
@@ -78,10 +79,10 @@
         </h5>
         <p>{{ g.project.description }}</p>
 
-        {% if g.project.mods or owner %}
+        {% if g.project.mods or g.owner %}
         <div class="mb-2">
           <span class="h5">Mods </span>
-          {% if owner %}
+          {% if g.owner %}
           <button id="add-mod" class="btn btn-sm btn-primary" data-bs-target="#addModModal"
             data-bs-toggle="modal">Add</button>
           {% endif %}
@@ -91,7 +92,7 @@
         <div id="mods">
           {% for mod in g.project.mods %}
           <p class="mb-1">
-            {% if owner %} <button class="btn px-1 far fa-trash-alt" data-index="{{ loop.index0 }}"></button> {% endif
+            {% if g.owner %} <button class="btn px-1 far fa-trash-alt" data-index="{{ loop.index0 }}"></button> {% endif
             %}{{ mod }}
           </p>
           {% endfor %}
@@ -148,7 +149,7 @@
   </div>
 </div>
 
-{% if owner %}
+{% if g.owner %}
 <div class="modal fade" id="addModModal" tabindex="-1">
   <div class="modal-dialog">
     <div class="modal-content">
