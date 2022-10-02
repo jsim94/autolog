@@ -104,6 +104,37 @@ def edit(project_id):
     return render_template('project_edit.html', form=form, user=current_user)
 
 
+@bp.route('/<project_id>/add-follow')
+@login_required
+def add_follow(project_id):
+    '''Route to add a project to a users following list'''
+
+    status = current_user.add_follow(g.project)
+
+    match status:
+        case 200:
+            flash(f'Now following {g.project.name}', 'info')
+            return redirect(request.referrer)
+        case 500:
+            flash('Error occured', 'error')
+            abort(500)
+
+
+@bp.route('/<project_id>/remove-follow')
+@login_required
+def remove_follow(project_id):
+    '''Route to remove a project to a users following list'''
+    status = current_user.remove_follow(g.project)
+
+    match status:
+        case 200:
+            flash(f'No longer following {g.project.name}', 'info')
+            return redirect(request.referrer)
+        case 500:
+            flash('Error occured', 'error')
+            abort(500)
+
+
 @bp.route('/<project_id>/add-mod', methods=['POST'])
 @owner_required
 def add_mod(project_id):

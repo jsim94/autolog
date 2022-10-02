@@ -1,0 +1,25 @@
+{% extends 'site_base.html' %}
+
+{% block title %}Modlog - Following{% endblock %}
+
+{% block subcontent %}
+
+<h1>Followed Projects</h1>
+
+{% for project in g.user.following %}
+<div class="mb-2">
+  <a href="{{ url_for('project.show', project_id=project.id) }}" class="text-reset text-decoration-none">
+    <div class="border rounded p-2">
+      <div>
+        <span class="h2 align-middle">{{ project.name }}</span>
+        <span class="h5 align-middle">@{{ project.user.username }}</span>
+        <a href="{{ url_for('project.remove_follow', project_id=project.id) }}" class="btn btn-sm btn-danger">Stop
+          Following</a>
+      </div>
+      <p>{{ project.description }}</p>
+    </div>
+  </a>
+</div>
+{% endfor %}
+
+{% endblock %}

@@ -37,8 +37,6 @@ class Project(uuid_pk, timestamps, db.Model):
     engine_size = db.Column(db.Float)
 
     pictures = db.relationship('ProjectPicture', backref='project')
-    followers = db.relationship(
-        'User', secondary='followers', backref='following')
     updates = db.relationship('Update', backref='project')
     comments = db.relationship('Comment', backref='project')
 
@@ -140,16 +138,6 @@ class Project(uuid_pk, timestamps, db.Model):
 
     def __repr__(self):
         return '<Project %r>' % self.name
-
-
-class Follower(db.Model):
-    '''Table that connects a user other than the owner to a project for the sake of following the project'''
-    __tablename__ = 'followers'
-
-    user_pk = db.Column(db.Integer, db.ForeignKey(
-        'users.pk', ondelete="cascade"), primary_key=True)
-    project_pk = db.Column(db.Integer, db.ForeignKey(
-        'projects.pk', ondelete="cascade"), primary_key=True)
 
 
 class Update(uuid_pk, timestamps, db.Model):

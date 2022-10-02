@@ -58,3 +58,8 @@ def edit():
         flash('Error occurred')
 
     return render_template('profile_edit.html', form=form, user=current_user)
+
+
+@bp.route('/<username>/following')
+def show_following(username):
+    return render_template('profile_following.html')

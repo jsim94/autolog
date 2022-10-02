@@ -52,6 +52,8 @@ class User(UserMixin, uuid_pk, db.Model):
         db.Text, default="default.png")
 
     projects = db.relationship('Project', backref='user')
+    following = db.relationship(
+        'Project', secondary='followers', backref='followers')
     comments = db.relationship('Comment', backref='user')
 
     def __repr__(self):
@@ -130,3 +132,33 @@ class User(UserMixin, uuid_pk, db.Model):
     def logout(self):
         '''Logsout current_user'''
         logout_user()
+
+    def add_follow(self, project):
+        '''Add a project to a users following list'''
+        try:
+            self.following.append(project)
+            db.session.commit()
+            return 200
+        except:
+            db.session.rollback()
+            return 500
+
+    def remove_follow(self, project):
+        '''Remove a project to a users following list'''
+        try:
+            self.following.remove(project)
+            db.session.commit()
+            return 200
+        except:
+            db.session.rollback()
+            return 500
+
+
+class Follow(db.Model):
+    '''Table that connects a user to a project for the sake of following the project'''
+    __tablename__ = 'followers'
+
+    user_pk = db.Column(db.Integer, db.ForeignKey(
+        'users.pk', ondelete="cascade"), primary_key=True)
+    project_pk = db.Column(db.Integer, db.ForeignKey(
+        'projects.pk', ondelete="cascade"), primary_key=True)
