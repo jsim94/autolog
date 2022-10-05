@@ -2,12 +2,15 @@
 
 from flask import Flask
 from flask_debugtoolbar import DebugToolbarExtension
-
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
+from flask_dropzone import Dropzone
+from flask_wtf.csrf import CSRFProtect, CSRFError
 
 db = SQLAlchemy()
 lm = LoginManager()
+dz = Dropzone()
+csrf = CSRFProtect()
 
 # initialize SQLalchemy models
 from . import models
@@ -18,14 +21,20 @@ def create_app():
     app = Flask(__name__)
     app.config.from_object('config.Config')
 
-    toolbar = DebugToolbarExtension(app)
-
-    db.init_app(app)
+    # toolbar = DebugToolbarExtension(app)
 
     lm.login_view = 'login'
+
+    db.init_app(app)
     lm.init_app(app)
+    dz.init_app(app)
+    csrf.init_app(app)
 
     with app.app_context():
+
+        @app.errorhandler(CSRFError)
+        def handle_csrf_error(e):
+            return e.description, 400
 
         from . import routes
         from .project import bp as project_bp

@@ -10,11 +10,12 @@ class Main {
   async deleteMod(e) {
     const index = $(e.target).data("index");
     const url = `${this.postPath}/delete-mod/${index}`;
+    const res = await axiosCSRF.delete(url);
 
-    const res = await axios.delete(url);
-    console.log($(e.target).parent());
     if (res.status == 200) {
       $(e.target).parent().remove();
+    } else {
+      console.error("Error deleting mod. ", res.status);
     }
   }
 }

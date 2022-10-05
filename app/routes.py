@@ -13,6 +13,7 @@ from app.bcolors import bcolors
 @app.before_request
 def clear_console():
     '''debug purposes only'''
+
     print(
         f'{bcolors.OKBLUE}#####################################################################{bcolors.ENDC}')
 
