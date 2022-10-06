@@ -4,6 +4,7 @@ from flask import render_template, redirect, g, url_for, abort, flash
 from flask_login import login_required, current_user
 
 from app.models.users import User
+# from app.models.images import ProfilePicture
 from app.forms import UserUpdate
 
 from . import bp
@@ -27,7 +28,7 @@ def show(username):
     owner = False
     if g.user == current_user:
         owner = True
-    if g.user.private is 'PRIVATE' and owner is False:
+    if g.user.private == 'PRIVATE' and owner is False:
         abort(403)
 
     return render_template('profile.html', owner=owner)
@@ -58,6 +59,17 @@ def edit():
         flash('Error occurred')
 
     return render_template('profile_edit.html', form=form, user=current_user)
+
+
+# @bp.route('/profile-picture', methods=['POST'])
+# @login_required
+# def change_profile_picture():
+#     ''''''
+#     print(request.files)
+#     image = request.files['image']
+
+#     profile_picture = ProfilePicture(image)
+#     return redirect(request.referrer)
 
 
 @bp.route('/<username>/following')

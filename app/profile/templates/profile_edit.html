@@ -4,6 +4,10 @@
 
 {% block subcontent %}
 
+{# dropzone.load_css() #}
+
+<!-- <script src="{# url_for('.static',filename='ajax.js') #}"></script> -->
+
 <div class="row g-5">
   <div class="d-flex justify-content-lg-center col-12 col-lg-3 mb-4">
     <div class="d-block ms-lg-0 mb-3 " style="height:200px;">
@@ -18,8 +22,6 @@
       <h3>{{ user.username }}</h3>
     </div>
   </div>
-
-
   <div class="col-12 col-lg-9">
     <form method="post">
       {{ form.hidden_tag() }}
@@ -30,13 +32,10 @@
       {{ field.label(class="text-align-start") }}
       {{ field(class="form-control mb-2") }}
       {% endfor %}
-
       <input type="submit" class="btn btn-success float-end" value="Save Changes">
-
     </form>
   </div>
 </div>
-
 <div class="modal fade" id="change-picture" tabindex="-1">
   <div class="modal-dialog">
     <div class="modal-content">
@@ -45,7 +44,7 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body">
-        Not Yet Implemented. Add drag and drop functionality here.
+        To be implemented
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -53,5 +52,8 @@
     </div>
   </div>
 </div>
-
+{# dropzone.load_js() #}
+{# dropzone.config(id='changeProfilePicture',custom_options='autoProcessQueue: false, addRemoveLinks:
+true,maxFilesize: 1024')
+#}
 {% endblock %}

@@ -18,3 +18,9 @@ class Config:
         environ.get('DATABASE_URL', 'postgresql:///modlog'))
     SQLALCHEMY_ECHO = False
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+
+    # Dropzone
+    # DROPZONE_ALLOWED_FILE_TYPE = 'image'
+    # DROPZONE_MAX_FILES = 20
+    # DROPZONE_ENABLE_CSRF = True
+    # DROPZONE_IN_FORM = True
