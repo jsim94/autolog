@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<link rel="stylesheet" href="{{ url_for('static',filename='styles.css') }}">
+<link rel="stylesheet" href="{{ url_for('static',filename='stylesheets/styles.css') }}">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.27.2/axios.min.js"
   integrity="sha512-odNmoc1XJy5x1TMVMdC7EMs3IVdItLPlCeL5vSUPN2llYKMJ2eByTTAIiiuqLg+GdNr9hF6z81p27DArRFKT7A=="
   crossorigin="anonymous" referrerpolicy="no-referrer"></script>
@@ -74,8 +74,8 @@
         <div class="modal-body text-center">
           <h4 class="my-4">Signup and start sharing your own project cars!</h4>
           <div class="d-grid gap-2 mt-5">
-            <a class="btn btn-primary" type="button">Signup</a>
-            <a class="btn btn-success" type="button">Login</a>
+            <a class="btn btn-primary" href="{{ url_for('signup') }}">Signup</a>
+            <a class="btn btn-success" href="{{ url_for('login') }}">Login</a>
           </div>
         </div>
       </form>

@@ -49,7 +49,7 @@ class User(UserMixin, uuid_pk, db.Model):
     private = db.Column(ENUM(PrivacyStatus),
                         nullable=False, default="PUBLIC")
     profile_picture = db.Column(
-        db.Text, default="default.png")
+        db.Text, default="../default.png")
 
     projects = db.relationship('Project', backref='user')
     following = db.relationship(

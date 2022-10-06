@@ -1,10 +1,8 @@
-const MODS = $("#mods");
-
 class Main {
   constructor() {
     this.postPath = window.location.pathname;
 
-    MODS.on("click", "button", this.deleteMod.bind(this));
+    $("#mods").on("click", "button", this.deleteMod.bind(this));
   }
 
   async deleteMod(e) {
