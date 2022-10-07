@@ -1,7 +1,6 @@
 # app > models > enums.py
 
 from enum import Enum
-from telnetlib import FORWARD_X
 
 
 class FormEnum():
