@@ -47,7 +47,7 @@
       <div class="col-xl-3 col-4">
         <img class="img-thumbnail w-100" data-bs-target="#big-picture" data-bs-slide-to="{{ loop.index0 }}"
           src="{{ url_for('static', filename='assets/project_pictures/thumbnails/'~picture.filename) }}" alt="">
-        <button class="delete-pic btn btn-sm text-decoration-none mt-1">Remove</button>
+        <button class="delete-pic btn btn-sm btn-outline-secondary text-decoration-none mt-1">Remove</button>
         <a href="{{ url_for('project.delete_picture', project_id=g.project.id,picture_id=picture.id) }}"
           class="confirm-delete d-none btn btn-sm btn-danger text-decoration-none mt-1">Confirm
         </a>

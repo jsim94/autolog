@@ -22,10 +22,12 @@ class Main {
     const btn = $(e.target);
     if (!btn.hasClass("btn-secondary")) {
       btn.addClass("btn-secondary");
+      btn.removeClass("btn-outline-secondary");
       btn.html("Cancel");
       btn.next().removeClass("d-none");
     } else {
       btn.removeClass("btn-secondary");
+      btn.addClass("btn-outline-secondary");
       btn.html("Remove");
       btn.next().addClass("d-none");
     }
