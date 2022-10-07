@@ -1,5 +1,6 @@
 # app > models > projects.py
 
+import warnings
 from sqlalchemy.dialects.postgresql import ARRAY, ENUM
 from sqlalchemy.ext.mutable import MutableList
 from sqlalchemy.exc import IntegrityError
@@ -36,9 +37,12 @@ class Project(uuid_pk, timestamps, db.Model):
     w2p = db.Column(db.Float)
     engine_size = db.Column(db.Float)
 
-    pictures = db.relationship('ProjectPicture', backref='project')
-    updates = db.relationship('Update', backref='project')
-    comments = db.relationship('Comment', backref='project')
+    pictures = db.relationship(
+        'ProjectPicture', cascade="all,delete", backref='project')
+    updates = db.relationship(
+        'Update', cascade="all,delete", backref='project')
+    comments = db.relationship(
+        'Comment', cascade="all,delete", backref='project')
 
     def calc_weight_to_power(self):
         '''Return weight to power ratio rounded to two digits'''
@@ -132,7 +136,11 @@ class Project(uuid_pk, timestamps, db.Model):
         try:
             db.session.delete(self)
             db.session.commit()
-        except:
+        except Exception as e:
+            warnings.warn(
+                'Error occured when deleting project. Project:' + self.id)
+            print(e)
+            db.session.rollback()
             return 500
         return 200
 

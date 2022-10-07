@@ -21,7 +21,7 @@ bcrypt = Bcrypt()
 @lm.user_loader
 def load_user(user_id):
     '''Get logged in user before request. Also adds user to flask global and updates last login time for user'''
-    user = User.get_by_uuid(user_id)
+    user = User.get_by_id(user_id)
     if user:
         g.current_user = user
         user.update_login_time()
@@ -51,10 +51,10 @@ class User(UserMixin, uuid_pk, db.Model):
     profile_picture = db.Column(
         db.Text, default="../default.png")
 
-    projects = db.relationship('Project', backref='user')
+    projects = db.relationship('Project', cascade="all,delete", backref='user')
     following = db.relationship(
-        'Project', secondary='followers', backref='followers')
-    comments = db.relationship('Comment', backref='user')
+        'Project', secondary='followers', cascade="all,delete", backref='followers')
+    comments = db.relationship('Comment', cascade="all,delete", backref='user')
 
     def __repr__(self):
         return '<User %r>' % self.username
@@ -65,9 +65,9 @@ class User(UserMixin, uuid_pk, db.Model):
         return cls.query.filter_by(username=username).first()
 
     @classmethod
-    def get_by_uuid(cls, uuid):
+    def get_by_id(cls, id):
         '''Get user object by uuid search or return none.'''
-        return cls.query.filter_by(id=uuid).first()
+        return cls.query.filter_by(id=id).first()
 
     def validate_password(self, password):
         '''Check if password hash matches and returns True or False'''
