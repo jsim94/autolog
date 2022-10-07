@@ -5,23 +5,25 @@
 {% block subcontent %}
 
 <link rel="stylesheet" href="{{ url_for('.static',filename='styles.css') }}">
+<link rel="stylesheet" href="{{ url_for('static',filename='stylesheets/lightbox.css') }}">
 {% if g.owner %}
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css"
   integrity="sha512-xh6O/CkQoPOWDdYTDqeRdPCVd1SpvCA9XXcUnZS2FmJNp1coAFzvtCN9BmamE+4aHK8yyUHUSCcJHgXloTyT2A=="
   crossorigin="anonymous" referrerpolicy="no-referrer" />
 {% endif %}
 
-
 <div class="row">
   <div class="col-lg-6 col-12">
     <div id="big-picture" class="carousel slide mb-3" data-bs-ride="false">
       <div class="carousel-inner mb-1">
-
         {% if g.project.pictures %}
         {% for picture in g.project.pictures %}
-        <div class="carousel-item active">
-          <img src="{{ url_for('static', filename='assets/project_pictures/'~picture.image_name) }}"
-            class="d-block w-100">
+        <div class="carousel-item{% if loop.index0 == 0%} active{% endif %}">
+          <a href="{{ url_for('static', filename='assets/project_pictures/'~picture.filename) }}"
+            data-lightbox="gallery">
+            <img src="{{ url_for('static', filename='assets/project_pictures/'~picture.filename) }}"
+              class="d-block w-100">
+          </a>
         </div>
         {% endfor %}
         <button class="carousel-control-prev" type="button" data-bs-target="#big-picture" data-bs-slide="prev">
@@ -34,7 +36,7 @@
         </button>
         {% else %}
         <div class="carousel-item active">
-          <img src="{{ url_for('static', filename='assets/project_pictures/placeholder.jpg') }}" class="d-block w-100">
+          <img src="{{ url_for('static', filename='assets/placeholder.jpg') }}" class="d-block w-100">
         </div>
         {% endif %}
       </div>
@@ -44,15 +46,18 @@
       {% for picture in g.project.pictures %}
       <div class="col-xl-3 col-4">
         <img class="img-thumbnail w-100" data-bs-target="#big-picture" data-bs-slide-to="{{ loop.index0 }}"
-          src="url_for('static', filename='assets/project_pictures/'~picture.image_name) " alt="">
+          src="{{ url_for('static', filename='assets/project_pictures/thumbnails/'~picture.filename) }}" alt="">
+        <button class="delete-pic btn btn-sm text-decoration-none mt-1">Remove</button>
+        <a href="{{ url_for('project.delete_picture', project_id=g.project.id,picture_id=picture.id) }}"
+          class="confirm-delete d-none btn btn-sm btn-danger text-decoration-none mt-1">Confirm
+        </a>
       </div>
       {% endfor %}
       {% endif %}
       {% if g.owner %}
-      <div class="col-xl-3 col-4">
-        <a href="#">
-          <img class="img-thumbnail w-100" data-bs-target="" data-bs-slide-to="" src="
-                  {{ url_for('static', filename='assets/project_pictures/add-thumbnail.jpg') }}" alt="">
+      <div class=" col-xl-3 col-4">
+        <a data-bs-target="#addPicture" data-bs-toggle="modal">
+          <img class="img-thumbnail w-100" src="{{ url_for('static', filename='assets/add-thumbnail.jpg') }}" alt="">
         </a>
       </div>
       {% endif %}
@@ -173,52 +178,71 @@
   </div>
 </div>
 {% if g.owner %}
-<div class="modal fade" id="addModModal" tabindex="-1">
+<div class="modal fade" id="addPicture" tabindex="-1">
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title">Add Mod</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-      </div>
-      <form action="/p/{{g.project.id}}/add-mod" method="post">
-        <div class="modal-body">
-          {{ mod_form.hidden_tag() }}
-          {{ mod_form.mod(class='form-control') }}
-          {% for error in mod_form.mod.errors %}
-          {{ error }}
-          {% endfor %}
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-          <input type="submit" class="btn btn-success" value="Add"></input>
-        </div>
-      </form>
-    </div>
-  </div>
-</div>
-<div class="modal fade" id="deleteModal" tabindex="-1">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Are you sure?</h5>
+        <h5 class="modal-title">Add Picture</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body">
-        Please confirm deletion
+        {{ dropzone.load_css() }}
+        {{ dropzone.create(action=url_for('project.add_picture',project_id=g.project.id)) }}
+        {{ dropzone.load_js() }}
+        {{ dropzone.config() }}
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-        <a href="/p/{{g.project.id}}/delete" class="btn btn-danger">Confirm</a>
+        <a href="{{ url_for('project.show',project_id=g.project.id) }}" class="btn btn-secondary">Close</a>
       </div>
     </div>
   </div>
-</div>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.27.2/axios.min.js"
-  integrity="sha512-odNmoc1XJy5x1TMVMdC7EMs3IVdItLPlCeL5vSUPN2llYKMJ2eByTTAIiiuqLg+GdNr9hF6z81p27DArRFKT7A=="
-  crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-<script src="{{ url_for('project.static',filename='ajax.js') }}"></script>
-{% endif %}
+  <div class="modal fade" id="addModModal" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Add Mod</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <form action="{{ url_for('project.add_mod', project_id=g.project.id) }}" method="post">
+          <div class="modal-body">
+            {{ mod_form.hidden_tag() }}
+            {{ mod_form.mod(class='form-control') }}
+            {% for error in mod_form.mod.errors %}
+            {{ error }}
+            {% endfor %}
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <input type="submit" class="btn btn-success" value="Add"></input>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  <div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Are you sure?</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          Please confirm deletion
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <a href="/p/{{g.project.id}}/delete" class="btn btn-danger">Confirm</a>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.27.2/axios.min.js"
+    integrity="sha512-odNmoc1XJy5x1TMVMdC7EMs3IVdItLPlCeL5vSUPN2llYKMJ2eByTTAIiiuqLg+GdNr9hF6z81p27DArRFKT7A=="
+    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script src="{{ url_for('project.static',filename='app.js') }}"></script>
+  <script src="{{ url_for('static',filename='js/lightbox.js') }}"></script>
+  {% endif %}
 
 
 
-{% endblock %}
+  {% endblock %}

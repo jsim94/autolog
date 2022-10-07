@@ -3,7 +3,7 @@
 {% block title %}Welcome to Modlog{% endblock %}
 
 {% block content %}
-<link rel="stylesheet" href="static/styles.css">
+<link rel="stylesheet" href="{{ url_for('static',filename='stylesheets/styles.css') }}">
 
 <div class="bg">
   <div class="h-75 d-flex align-items-center justify-content-center">

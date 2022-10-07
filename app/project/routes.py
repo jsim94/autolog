@@ -6,6 +6,7 @@ from flask_login import current_user, login_required
 
 from . import bp
 from app.models.projects import Project
+from app.models.images import ProjectPicture
 from app.forms import NewProjectForm, EditProjectForm, AddModForm
 
 from app.bcolors import bcolors
@@ -15,7 +16,7 @@ from app.bcolors import bcolors
 def get_project_object(endpoint, values):
     '''Gets the project object from database and adds it and the users ownership status to flask global'''
     try:
-        g.project = Project.get_by_uuid(uuid=values['project_id'])
+        g.project = Project.get_by_id(id=values['project_id'])
         g.owner = True if g.project.user == current_user else False
     except KeyError:
         return
@@ -108,7 +109,6 @@ def edit(project_id):
 @login_required
 def add_follow(project_id):
     '''Route to add a project to a users following list'''
-
     status = current_user.add_follow(g.project)
 
     match status:
@@ -135,8 +135,39 @@ def remove_follow(project_id):
             abort(500)
 
 
-@bp.route('/<project_id>/add-mod', methods=['POST'])
+@bp.route('/<project_id>/add-picture', methods=['POST'])
 @owner_required
+def add_picture(project_id):
+    '''Route to add a picture to a users project'''
+    ip = request.remote_addr
+    file = request.files['file']
+
+    image = ProjectPicture.add(file=file, project=g.project, ip=ip)
+
+    if image:
+        return 'Success', 200
+
+    return 'Error occured', 500
+
+
+@bp.route('/<project_id>/<picture_id>/delete')
+@owner_required
+def delete_picture(project_id, picture_id):
+    '''Route to remove a picture from a users project'''
+    try:
+        picture = ProjectPicture.get_by_id(id=picture_id)
+        picture.delete()
+    except AttributeError:
+        abort(404)
+    except FileNotFoundError:
+        abort(500)
+
+    flash('Picture deleted', 'info')
+    return redirect(url_for('project.show', project_id=project_id))
+
+
+@ bp.route('/<project_id>/add-mod', methods=['POST'])
+@ owner_required
 def add_mod(project_id):
     '''Route to add a mod to a project's mod list'''
     form = AddModForm()
@@ -177,4 +208,4 @@ def delete(project_id):
             return redirect(url_for('profile.show', username=g.project.user.username))
 
     flash('Error Occured')
-    return redirect(url_for('profile.show', project_id=project_id))
+    return redirect(url_for('project.show', project_id=project_id))

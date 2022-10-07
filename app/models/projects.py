@@ -87,9 +87,9 @@ class Project(uuid_pk, timestamps, db.Model):
         return cls.query.filter_by(name=name).first()
 
     @classmethod
-    def get_by_uuid(cls, uuid):
+    def get_by_id(cls, id):
         '''Get user object by uuid search or return none.'''
-        return cls.query.filter_by(id=uuid).first()
+        return cls.query.filter_by(id=id).first()
 
     def owner_required(func):
         '''Decorator that checks if flask_login.current_user is the user of the project'''
