@@ -155,6 +155,7 @@
     </div>
   </div>
 </div>
+<script src="{{ url_for('static',filename='js/lightbox.js') }}"></script>
 <!-- Modals -->
 <div class="modal fade" id="followersModal" tabindex="-1">
   <div class="modal-dialog modal-dialog-scrollable">
@@ -198,53 +199,48 @@
       </div>
     </div>
   </div>
-  <div class="modal fade" id="addModModal" tabindex="-1">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title">Add Mod</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-        </div>
-        <form action="{{ url_for('project.add_mod', project_id=g.project.id) }}" method="post">
-          <div class="modal-body">
-            {{ mod_form.hidden_tag() }}
-            {{ mod_form.mod(class='form-control') }}
-            {% for error in mod_form.mod.errors %}
-            {{ error }}
-            {% endfor %}
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-            <input type="submit" class="btn btn-success" value="Add"></input>
-          </div>
-        </form>
+</div>
+<div class="modal fade" id="addModModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Add Mod</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
-    </div>
-  </div>
-  <div class="modal fade" id="deleteModal" tabindex="-1">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title">Are you sure?</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-        </div>
+      <form action="{{ url_for('project.add_mod', project_id=g.project.id) }}" method="post">
         <div class="modal-body">
-          Please confirm deletion
+          {{ mod_form.hidden_tag() }}
+          {{ mod_form.mod(class='form-control') }}
+          {% for error in mod_form.mod.errors %}
+          {{ error }}
+          {% endfor %}
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-          <a href="/p/{{g.project.id}}/delete" class="btn btn-danger">Confirm</a>
+          <input type="submit" class="btn btn-success" value="Add"></input>
         </div>
+      </form>
+    </div>
+  </div>
+</div>
+<div class="modal fade" id="deleteModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Are you sure?</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        Please confirm deletion
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <a href="/p/{{g.project.id}}/delete" class="btn btn-danger">Confirm</a>
       </div>
     </div>
   </div>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.27.2/axios.min.js"
-    integrity="sha512-odNmoc1XJy5x1TMVMdC7EMs3IVdItLPlCeL5vSUPN2llYKMJ2eByTTAIiiuqLg+GdNr9hF6z81p27DArRFKT7A=="
-    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-  <script src="{{ url_for('project.static',filename='app.js') }}"></script>
-  <script src="{{ url_for('static',filename='js/lightbox.js') }}"></script>
-  {% endif %}
+</div>
 
-
-
-  {% endblock %}
+<script src="{{ url_for('project.static',filename='app.js') }}"></script>
+{% endif %}
+{% endblock %}

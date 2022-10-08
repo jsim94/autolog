@@ -58,11 +58,12 @@
 
 {% if not g.current_user %}
 <script>
-  if (!document.cookie)
+  if (!localStorage.getItem('signup')) {
     setTimeout(function () {
       $('#welcome').modal('show');
       localStorage.setItem('signup', true)
-    }, 5000);
+    }, 5000)
+  };
 </script>
 
 <div class="modal fade" id="welcome" tabindex="-1">
