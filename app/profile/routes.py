@@ -12,8 +12,9 @@ from . import bp
 
 @bp.url_value_preprocessor
 def get_profile_owner(endpoint, values):
-    g.user = User.get_by_username(username=values.get(
-        'username', current_user.username if hasattr('current_user', 'username') else None))
+    g.user = User.get_by_username(username=values.get('username'))
+    if g.user == current_user:
+        g.owner = True
 
 
 @bp.route('/<username>')
