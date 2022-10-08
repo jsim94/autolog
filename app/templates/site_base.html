@@ -58,9 +58,11 @@
 
 {% if not g.current_user %}
 <script>
-  setTimeout(function () {
-    $('#welcome').modal('show');
-  }, 5000);
+  if (!document.cookie)
+    setTimeout(function () {
+      $('#welcome').modal('show');
+      localStorage.setItem('signup', true)
+    }, 5000);
 </script>
 
 <div class="modal fade" id="welcome" tabindex="-1">
@@ -70,15 +72,13 @@
         <h5 class="modal-title">Welcome to Modlog!</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
-      <form action="/p/{{g.project.id}}/add-mod" method="post">
-        <div class="modal-body text-center">
-          <h4 class="my-4">Signup and start sharing your own project cars!</h4>
-          <div class="d-grid gap-2 mt-5">
-            <a class="btn btn-primary" href="{{ url_for('signup') }}">Signup</a>
-            <a class="btn btn-success" href="{{ url_for('login') }}">Login</a>
-          </div>
+      <div class="modal-body text-center">
+        <h4 class="my-4">Signup and start sharing your own project cars!</h4>
+        <div class="d-grid gap-2 mt-5">
+          <a class="btn btn-primary" href="{{ url_for('signup') }}">Signup</a>
+          <a class="btn btn-success" href="{{ url_for('login') }}">Login</a>
         </div>
-      </form>
+      </div>
     </div>
   </div>
 </div>
