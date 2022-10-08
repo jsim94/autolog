@@ -99,7 +99,7 @@ class Project(uuid_pk, timestamps, db.Model):
         return inner
 
     @owner_required
-    def update(self, owner):
+    def update(self):
         '''Method to take in updates to a project and commit them to the database. 
         --
         At this time all this does is commit the update to the database. The actual update is handled in project/routes.py with 'form.populate_obj()' --
