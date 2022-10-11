@@ -13,7 +13,7 @@
 {% endif %}
 
 <div class="row">
-  <div class="col-lg-6 col-12">
+  <div class="col-lg-6 col-12 mb-3">
     <div id="big-picture" class="carousel slide mb-3" data-bs-ride="false">
       <div class="carousel-inner mb-1">
         {% if g.project.pictures %}
@@ -41,7 +41,7 @@
         {% endif %}
       </div>
     </div>
-    <div id="thumbnails" class="row g-2">
+    <div id="thumbnails" class="row g-2 overflow-scroll shadow-sm">
       {% if g.project.pictures %}
       {% for picture in g.project.pictures %}
       <div class="col-xl-3 col-4">
@@ -57,7 +57,7 @@
       {% endfor %}
       {% endif %}
       {% if g.owner %}
-      <div class=" col-xl-3 col-4">
+      <div class="col-xl-3 col-4">
         <a data-bs-target="#addPicture" data-bs-toggle="modal">
           <img class="img-thumbnail w-100" src="{{ url_for('static', filename='assets/add-thumbnail.jpg') }}" alt="">
         </a>
