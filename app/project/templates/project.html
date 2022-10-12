@@ -41,11 +41,11 @@
         {% endif %}
       </div>
     </div>
-    <div id="thumbnails" class="row g-2 overflow-scroll shadow-sm">
+    <div id="thumbnails" class="scrollbox row g-2 overflow-scroll border rounded px-1">
       {% if g.project.pictures %}
       {% for picture in g.project.pictures %}
       <div class="col-xl-3 col-4">
-        <img class="img-thumbnail w-100" data-bs-target="#big-picture" data-bs-slide-to="{{ loop.index0 }}"
+        <img class="w-100 rounded" data-bs-target="#big-picture" data-bs-slide-to="{{ loop.index0 }}"
           src="{{ url_for('static', filename='assets/project_pictures/thumbnails/'~picture.filename) }}" alt="">
         {% if g.owner %}
         <button class="delete-pic btn btn-sm btn-outline-secondary text-decoration-none mt-1">Remove</button>
