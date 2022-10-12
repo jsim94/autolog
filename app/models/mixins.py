@@ -11,7 +11,7 @@ def generate_uuid_hex():
 
 
 class timestamps(object):
-    '''Mixin for creation date column'''
+    '''Mixin for creation date and auto last_edit date columns'''
     created_at = db.Column(db.DateTime, nullable=False,
                            default=datetime.utcnow())
     last_edit = db.Column(db.DateTime, nullable=False,
@@ -19,7 +19,7 @@ class timestamps(object):
 
 
 class uuid_pk(object):
-    '''Mixin for an auto increment int primary key and a unique UUID'''
+    '''Mixin for an auto increment int primary key and a unique hex UUID'''
     pk = db.Column(db.Integer, primary_key=True)
     id = db.Column(db.String(32), unique=True,
                    nullable=False, default=generate_uuid_hex)
