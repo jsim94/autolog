@@ -12,21 +12,23 @@ class LoginForm(FlaskForm):
     """Form for user login"""
 
     username = StringField('Username', validators=[
-                           InputRequired(), Length(min=4, max=20)])
+                           InputRequired()])
     password = PasswordField('Password', validators=[
-                             InputRequired(), Length(min=8, max=32)])
+                             InputRequired()])
 
 
-class UserForm(LoginForm, FlaskForm):
+class SignupForm(FlaskForm):
     """Form for user signup"""
 
     email = StringField('E-mail', validators=[InputRequired(), Email()])
+    username = StringField('Username', validators=[
+                           InputRequired(), Length(min=4, max=20)])
     password = PasswordField('New Password', validators=[InputRequired(), Length(min=8, max=32), EqualTo(
         'confirm', message='Passwords must match')])
     confirm = PasswordField('Repeat New Password')
 
 
-class UserUpdate(UserForm, FlaskForm):
+class UserEdit(SignupForm, FlaskForm):
     '''Form for user update'''
     old_password = PasswordField('Old Password')
 
@@ -51,8 +53,6 @@ class NewProjectForm(FlaskForm):
     drivetrain = SelectField('Drivetrain', choices=Drivetrain.choices)
     engine_size = DecimalField('Engine Size(L)', default=0)
 
-    # WIP - pictures = MultipleFileField()
-
 
 class EditProjectForm(NewProjectForm, FlaskForm):
     '''Form for editing a project car'''
@@ -63,4 +63,11 @@ class EditProjectForm(NewProjectForm, FlaskForm):
 
 class AddModForm(FlaskForm):
     '''Form for adding a mod to a project'''
-    mod = StringField('mod', validators=[Length(max=50)])
+    mod = StringField('Describe Mod', validators=[Length(max=50)])
+
+
+class UpdateForm(FlaskForm):
+    '''Form for adding an update to a project'''
+    title = StringField('Title', validators=[Length(max=60)])
+    content = StringField('Post your new update',
+                          widget=TextArea(), validators=[Length(max=750), InputRequired()])

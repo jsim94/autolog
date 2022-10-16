@@ -1,13 +1,14 @@
 # app > project > route.py
 
-from functools import wraps
+from sqlalchemy.exc import NoResultFound
 from flask import render_template, request, redirect, url_for, g, flash, abort
 from flask_login import current_user, login_required
 
 from . import bp
-from app.models.projects import Project
+from app.models.projects import Project, Update
 from app.models.images import ProjectPicture
-from app.forms import NewProjectForm, EditProjectForm, AddModForm
+from app.forms import NewProjectForm, EditProjectForm, AddModForm, UpdateForm
+from app.utils import owner_required
 
 from app.bcolors import bcolors
 
@@ -18,28 +19,47 @@ def get_project_object(endpoint, values):
     try:
         g.project = Project.get_by_id(id=values['project_id'])
         g.owner = True if g.project.user == current_user else False
+    except NoResultFound:
+        abort(404)
     except KeyError:
         return
-    if not g.project:
-        abort(404)
 
 
-def owner_required(func):
-    '''Decorator to return a 403 error if the current user is not authorized to access endpoint'''
-    @wraps(func)
-    def inner(*args, **kwargs):
-        if not g.get('owner'):
-            abort(403)
-        return func(*args, **kwargs)
-    return inner
+@bp.route('/<project_id>/get-form')
+def get_modal_form(project_id):
+    '''Takes 'form' query param and returns the request form '''
+    type = request.args.get('form')
+    update_id = request.args.get('updateId')
+
+    if type == 'newUpdate':
+        title = 'New Post'
+        url = url_for('project.new_update', project_id=project_id)
+        return render_template('modal_form.html', form=UpdateForm(), title=title, url=url)
+
+    if type == 'editUpdate':
+        title = 'Update Post'
+        url = url_for('project.edit_update',
+                      project_id=project_id, update_id=update_id)
+        update = Update.get_by_id(update_id)
+        return render_template('modal_form.html', form=UpdateForm(obj=update), title=title, url=url)
+
+    if type == 'addMod':
+        title = 'Add Mod'
+        url = url_for('project.add_mod', project_id=project_id)
+        return render_template('modal_form.html', form=AddModForm(), title=title, url=url)
+
+    if type == 'followers':
+        title = 'Followers'
+        return render_template('modal_followers.html', title=title)
 
 
 @bp.route('/<project_id>')
 def show(project_id):
     '''Retreives the page for the project car if found and if the requesting client has access to the page.'''
     mod_form = AddModForm()
+    update_form = UpdateForm()
 
-    return render_template('project.html', mod_form=mod_form)
+    return render_template('project.html', mod_form=mod_form, update_form=update_form)
 
 
 @bp.route('/new', methods=['GET', 'POST'])
@@ -91,16 +111,14 @@ def edit(project_id):
     form = EditProjectForm(obj=g.project)
 
     if form.validate_on_submit():
-        form.populate_obj(g.project)
-        status = g.project.update()
-
-        if status == 403:
-            abort(403)
-
-        if status == 200:
-            flash('Project successfully updated', 'info')
-            return redirect(url_for('project.show', project_id=project_id))
-        flash('Error occurred')
+        data = form.data.copy()
+        data.pop('csrf_token', None)
+        try:
+            Project.edit(id=project_id, keys=data)
+        except NoResultFound:
+            abort(404)
+        flash('Project Successfully edited', 'info')
+        return redirect(url_for('project.show', project_id=project_id))
 
     return render_template('project_edit.html', form=form, user=current_user)
 
@@ -109,30 +127,27 @@ def edit(project_id):
 @login_required
 def add_follow(project_id):
     '''Route to add a project to a users following list'''
-    status = current_user.add_follow(g.project)
-
-    match status:
-        case 200:
-            flash(f'Now following {g.project.name}', 'info')
-            return redirect(request.referrer)
-        case 500:
-            flash('Error occured', 'error')
-            abort(500)
+    try:
+        g.project.add_follow(user=current_user)
+        flash(f'Now following {g.project.name}', 'info')
+    except:
+        flash('Error occured', 'error')
+        abort(500)
+    return redirect(request.referrer)
 
 
 @bp.route('/<project_id>/remove-follow')
 @login_required
 def remove_follow(project_id):
     '''Route to remove a project to a users following list'''
-    status = current_user.remove_follow(g.project)
+    try:
+        g.project.remove_follow(user=current_user)
+        flash(f'No longer following {g.project.name}', 'info')
+    except:
+        flash('Error occured', 'error')
+        abort(500)
 
-    match status:
-        case 200:
-            flash(f'No longer following {g.project.name}', 'info')
-            return redirect(request.referrer)
-        case 500:
-            flash('Error occured', 'error')
-            abort(500)
+    return redirect(request.referrer)
 
 
 @bp.route('/<project_id>/add-picture', methods=['POST'])
@@ -146,8 +161,7 @@ def add_picture(project_id):
 
     if image:
         return 'Success', 200
-
-    return 'Error occured', 500
+    abort(500)
 
 
 @bp.route('/<project_id>/<picture_id>/delete')
@@ -155,57 +169,88 @@ def add_picture(project_id):
 def delete_picture(project_id, picture_id):
     '''Route to remove a picture from a users project'''
     try:
-        picture = ProjectPicture.get_by_id(id=picture_id)
-        picture.delete()
+        ProjectPicture.delete(id=picture_id)
     except AttributeError:
         abort(404)
-    except FileNotFoundError:
-        abort(500)
+    except FileNotFoundError as e:
+        print('WARNING', e)
+        flash('Error deleting picture')
 
     flash('Picture deleted', 'info')
     return redirect(url_for('project.show', project_id=project_id))
 
 
-@ bp.route('/<project_id>/add-mod', methods=['POST'])
-@ owner_required
+@bp.route('/<project_id>/add-mod', methods=['POST'])
+@owner_required
 def add_mod(project_id):
     '''Route to add a mod to a project's mod list'''
     form = AddModForm()
     if form.validate_on_submit():
         mod = form.mod.data
         g.project.add_mod(mod)
-
-    else:
-        flash('Error', 'error')
-
-    return redirect(url_for('project.show', project_id=project_id))
+        return redirect(url_for('project.show', project_id=project_id))
+    abort(400)
 
 
 @bp.route('/<project_id>/delete-mod/<int:index>', methods=['DELETE'])
 @owner_required
 def delete_mod(project_id, index):
     '''Route to delete a mod from a project's mod list'''
-    status = g.project.delete_mod(index=index)
-    match status:
-        case 200:
-            return 'Successfully deleted', 200
-        case 404:
-            return 'Not found', 404
-        case 403:
-            return 'Forbidden', 403
+    try:
+        g.project.delete_mod(index=index)
+    except IndexError:
+        abort(404)
+    return 'Success', 200
+
+
+@bp.route('/<project_id>/new-update', methods=['POST'])
+@owner_required
+def new_update(project_id):
+    '''Route to add an update to a users project'''
+    form = UpdateForm()
+
+    if form.validate_on_submit():
+        title = form.title.data
+        content = form.content.data
+        g.project.add_update(title=title, content=content)
+    else:
+        flash('Error Occurred', 'error')
+    return redirect(url_for('project.show', project_id=project_id))
+
+
+@bp.route('/<project_id>/edit-update/<update_id>', methods=['POST'])
+@owner_required
+def edit_update(project_id, update_id):
+    '''Route to edit an existing project update'''
+    form = UpdateForm()
+
+    if form.validate_on_submit():
+        title = form.title.data
+        content = form.content.data
+        try:
+            Update.edit(id=update_id, title=title, content=content)
+        except:
+            raise
+    else:
+        flash('Error Occurred', 'error')
+    return redirect(url_for('project.show', project_id=project_id))
+
+
+@bp.route('<project_id>/delete-update/<update_id>')
+@owner_required
+def delete_update(project_id, update_id):
+    '''Route to delete an update from a users project'''
+    try:
+        Update.delete(id=update_id)
+    except NoResultFound:
+        abort(404)
+    return redirect(url_for('project.show', project_id=project_id))
 
 
 @bp.route('/<project_id>/delete')
 @owner_required
 def delete(project_id):
     '''Deletes project from database'''
-    status = g.project.delete()
-    match status:
-        case 403:
-            abort(403)
-        case 200:
-            flash('Project deleted', 'info')
-            return redirect(url_for('profile.show', username=g.project.user.username))
-
-    flash('Error Occured')
-    return redirect(url_for('project.show', project_id=project_id))
+    Project.delete(obj=g.project)
+    flash('Project deleted', 'info')
+    return redirect(url_for('profile.show', username=g.project.user.username))

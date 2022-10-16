@@ -6,14 +6,13 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 from flask_dropzone import Dropzone
 from flask_wtf.csrf import CSRFProtect, CSRFError
+from flask_moment import Moment
 
 db = SQLAlchemy()
 lm = LoginManager()
 dz = Dropzone()
 csrf = CSRFProtect()
-
-# initialize SQLalchemy models
-from . import models
+moment = Moment()
 
 
 def create_app():
@@ -29,8 +28,12 @@ def create_app():
     lm.init_app(app)
     dz.init_app(app)
     csrf.init_app(app)
+    moment.init_app(app)
 
     with app.app_context():
+
+        # initialize SQLalchemy models
+        from . import models
 
         @app.errorhandler(CSRFError)
         def handle_csrf_error(e):

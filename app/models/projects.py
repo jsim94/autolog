@@ -1,19 +1,17 @@
 # app > models > projects.py
 
-import warnings
 from sqlalchemy.dialects.postgresql import ARRAY, ENUM
 from sqlalchemy.ext.mutable import MutableList
-from sqlalchemy.exc import IntegrityError
-from flask_login import current_user
+from sqlalchemy.exc import NoResultFound
 
 from app import db
-from .mixins import uuid_pk, timestamps
+from .mixins import base, timestamps
 from .enums import PrivacyStatus, Drivetrain
 
 from app.bcolors import bcolors
 
 
-class Project(uuid_pk, timestamps, db.Model):
+class Project(base, timestamps, db.Model):
     '''Project car class. Each project car has one owner'''
     __tablename__ = 'projects'
 
@@ -34,24 +32,33 @@ class Project(uuid_pk, timestamps, db.Model):
     torque = db.Column(db.Integer)
     weight = db.Column(db.Integer)
     drivetrain = db.Column(ENUM(Drivetrain))
-    w2p = db.Column(db.Float)
     engine_size = db.Column(db.Float)
 
     pictures = db.relationship(
-        'ProjectPicture', cascade="all,delete", backref='project')
+        'ProjectPicture', cascade="all,delete-orphan", backref='project')
     updates = db.relationship(
-        'Update', cascade="all,delete", backref='project')
+        'Update', cascade="all,delete-orphan", backref='project')
     comments = db.relationship(
-        'Comment', cascade="all,delete", backref='project')
+        'Comment', cascade="all,delete-orphan", backref='project')
 
-    def calc_weight_to_power(self):
+    @property
+    def w2p(self):
         '''Return weight to power ratio rounded to two digits'''
         try:
             return round((self.weight / self.horsepower), 2)
         except ZeroDivisionError:
             return 0
 
-    w2p = property(calc_weight_to_power)
+    def __repr__(self):
+        return '<Project %r>' % self.name
+
+    @classmethod
+    def get_by_name(cls, name):
+        '''Get user object by username search or return none.'''
+        project = cls.query.filter_by(name=name).first()
+        if project:
+            return project
+        raise NoResultFound()
 
     @classmethod
     def create(cls, user_pk, name, description, model_id, private, year, make, model, horsepower, torque, weight, drivetrain, engine_size):
@@ -73,91 +80,58 @@ class Project(uuid_pk, timestamps, db.Model):
             engine_size=engine_size
         )
 
-        try:
-            db.session.add(project)
-            db.session.commit()
-        except IntegrityError:
-            db.session.rollback()
-            return
+        db.session.add(project)
+        cls._commit()
         return project
 
-    @classmethod
-    def get_by_name(cls, name):
-        '''Get user object by username search or return none.'''
-        return cls.query.filter_by(name=name).first()
+    def add_follow(self, user):
+        '''Add a user to a projects followers list
 
-    @classmethod
-    def get_by_id(cls, id):
-        '''Get user object by uuid search or return none.'''
-        return cls.query.filter_by(id=id).first()
-
-    def owner_required(func):
-        '''Decorator that checks if flask_login.current_user is the user of the project'''
-
-        def inner(self, *args, **kwargs):
-            return func(self, *args, **kwargs) if self.user == current_user else 403
-        return inner
-
-    @owner_required
-    def update(self):
-        '''Method to take in updates to a project and commit them to the database. 
-        --
-        At this time all this does is commit the update to the database. The actual update is handled in project/routes.py with 'form.populate_obj()' --
+        :param project: project instance
+        :param id: id of project instance
         '''
-        db.session.commit()
-        return 200
+        self.followers.append(user)
+        self._commit()
 
-    @owner_required
+    def remove_follow(self, user):
+        '''Remove a user to a projects followers list
+
+        :param project: project instance
+        :param id: id of project instance
+        '''
+        self.followers.remove(user)
+        self._commit()
+
     def add_mod(self, mod):
         '''Add mod to projects mod list'''
-        try:
-            self.mods.append(mod)
-            db.session.commit()
-        except:
-            return 500
+        self.mods.append(mod)
+        self._commit()
 
-        return 200
-
-    @owner_required
     def delete_mod(self, index):
         '''Takes index of mod to delete and deletes it from project.mods'''
-        try:
-            self.mods.pop(index)
-            db.session.commit()
-        except IndexError:
-            return 404
-        except:
-            return 500
-        return 200
+        self.mods.pop(index)
+        self._commit()
 
-    @owner_required
-    def delete(self):
-        '''Check auth of user and either return 403 or 200'''
-        try:
-            db.session.delete(self)
-            db.session.commit()
-        except Exception as e:
-            warnings.warn(
-                'Error occured when deleting project. Project:' + self.id)
-            print(e)
-            db.session.rollback()
-            return 500
-        return 200
+    def add_update(self, title, content):
+        '''Creates a new row in updates table and appends it to the project'''
 
-    def __repr__(self):
-        return '<Project %r>' % self.name
+        update = Update(project_pk=self.pk, title=title.rstrip(),
+                        content=content.rstrip())
+        db.session.add(update)
+        self._commit()
 
 
-class Update(uuid_pk, timestamps, db.Model):
+class Update(base, timestamps, db.Model):
     '''Table that holds update posts to a project'''
     __tablename__ = 'updates'
 
     project_pk = db.Column(db.Integer, db.ForeignKey(
         'projects.pk', ondelete="cascade"))
-    content = db.Column(db.Text, nullable=False)
+    title = db.Column(db.String(60))
+    content = db.Column(db.String(1000), nullable=False)
 
 
-class Comment(uuid_pk, timestamps, db.Model):
+class Comment(base, timestamps, db.Model):
     '''Table that holds comments other users can make for a project '''
     __tablename__ = 'comments'
 

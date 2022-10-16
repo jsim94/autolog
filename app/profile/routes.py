@@ -1,45 +1,45 @@
 # app > profile > routes.py
 
+from sqlalchemy.exc import NoResultFound
 from flask import render_template, redirect, g, url_for, abort, flash
 from flask_login import login_required, current_user
 
 from app.models.users import User
 # from app.models.images import ProfilePicture
-from app.forms import UserUpdate
+from app.forms import UserEdit
+from app.utils import owner_required
 
 from . import bp
 
 
 @bp.url_value_preprocessor
 def get_profile_owner(endpoint, values):
-    g.user = User.get_by_username(username=values.get('username'))
-    if g.user == current_user:
-        g.owner = True
+    try:
+        g.user = User.get_by_username(username=values.get('username'))
+        g.owner = True if g.user == current_user else False
+    except NoResultFound:
+        abort(404)
+    except KeyError:
+        return
 
 
 @bp.route('/<username>')
 def show(username):
     '''Retrieves the profile page for the user by username if the requesting client has access to the page, otherwise returns 403.'''
-
     # if user not found return 404
     if not g.user:
         abort(404)
-
-    # determine if current_user is the owner of g.user and return 403 if current_user doesn't have access
-    owner = False
-    if g.user == current_user:
-        owner = True
-    if g.user.private == 'PRIVATE' and owner is False:
+    # return 403 is profile is private and the current_user is not the owner
+    if g.user.private == 'PRIVATE' and g.owner is False:
         abort(403)
-
-    return render_template('profile.html', owner=owner)
+    return render_template('profile.html')
 
 
 @bp.route('/edit', methods=['GET', 'POST'])
 @login_required
 def edit():
-    '''GET returns a profile edit page and POST will update profile'''
-    form = UserUpdate(obj=current_user)
+    '''GET returns a profile edit page and POST will edit profile'''
+    form = UserEdit(obj=current_user)
 
     if form.validate_on_submit():
         username = form.username.data
@@ -47,15 +47,14 @@ def edit():
         new_password = form.password.data
         email = form.email.data
 
-        user = current_user.update(
-            username=username,
-            old_password=old_password,
-            new_password=new_password,
-            email=email
-        )
-
+        if User.validate(user=current_user, password=old_password):
+            user = current_user.edit(
+                username=username,
+                new_password=new_password,
+                email=email
+            )
         if user:
-            flash('Profile successfully updated')
+            flash('Profile successfully updated', 'info')
             return redirect(url_for('profile.show', username=user.username))
         flash('Error occurred')
 

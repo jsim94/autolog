@@ -1,0 +1,22 @@
+<div class="modal-header">
+  <h5 class="modal-title">{{ title }}</h5>
+  <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+</div>
+<div class="modal-body">
+  <form action="{{ url }}" method="post">
+    {{ form.hidden_tag() }}
+    {% for field in form if field.widget.input_type != 'hidden' %}
+    <div class="mb-3">
+      {{ field.label(class="form-label")}}
+      {{ field(class="w-100 form-control") }}
+      {% for error in field.errors %}
+      {{ error }}
+      {% endfor %}
+    </div>
+    {% endfor %}
+    <div class="float-end">
+      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+      <input type="submit" class="btn btn-success" value="Add"></input>
+    </div>
+  </form>
+</div>

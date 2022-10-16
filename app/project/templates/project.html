@@ -3,7 +3,7 @@
 {% block title %}Modlog - {{ g.project.name }}{% endblock %}
 
 {% block subcontent %}
-
+{{ moment.include_moment()}}
 <link rel="stylesheet" href="{{ url_for('.static',filename='styles.css') }}">
 <link rel="stylesheet" href="{{ url_for('static',filename='stylesheets/lightbox.css') }}">
 {% if g.owner %}
@@ -11,6 +11,7 @@
   integrity="sha512-xh6O/CkQoPOWDdYTDqeRdPCVd1SpvCA9XXcUnZS2FmJNp1coAFzvtCN9BmamE+4aHK8yyUHUSCcJHgXloTyT2A=="
   crossorigin="anonymous" referrerpolicy="no-referrer" />
 {% endif %}
+<script src="{{ url_for('project.static',filename='app.js') }}"></script>
 
 <div class="row">
   <div class="col-lg-6 col-12 mb-3">
@@ -41,7 +42,7 @@
         {% endif %}
       </div>
     </div>
-    <div id="thumbnails" class="scrollbox row g-2 overflow-scroll border rounded px-1">
+    <div id="thumbnails" class="scrollbox row g-2 overflow-scroll border rounded px-1 pb-2">
       {% if g.project.pictures %}
       {% for picture in g.project.pictures %}
       <div class="col-xl-3 col-4">
@@ -78,7 +79,8 @@
       {% endif %}
       {% if g.owner %}
       <a class="btn btn-sm btn-warning" href="{{ url_for('project.edit', project_id=g.project.id) }}">Edit</a>
-      <button class="btn btn-sm btn-danger" data-bs-target="#deleteModal" data-bs-toggle="modal">Delete</button>
+      <button class="btn btn-sm btn-danger" data-href="{{ url_for('project.delete',project_id=g.project.id) }}"
+        data-bs-target="#deleteModal" data-bs-toggle="modal">Delete</button>
       {% endif %}
     </div>
     <div class=" row">
@@ -87,21 +89,22 @@
             href="{{ url_for('profile.show',username=g.project.user.username) }}">
             @{{g.project.user.username}}</a>
         </h5>
-        Followers <button class="btn badge text-bg-primary" data-bs-target="#followersModal" data-bs-toggle="modal">
+        Followers <button class="btn badge text-bg-primary" data-bs-target="#modal" data-bs-toggle="modal"
+          data-modal-type="followers">
           {{g.project.followers|length}}</button>
         <p class="mt-3">{{ g.project.description }}</p>
         {% if g.project.mods or g.owner %}
         <div class="mb-2">
           <span class="h5">Mods </span>
           {% if g.owner %}
-          <button id="add-mod" class="btn btn-sm btn-primary" data-bs-target="#addModModal"
-            data-bs-toggle="modal">Add</button>
+          <button class="btn btn-sm btn-primary" data-bs-target="#modal" data-bs-toggle="modal"
+            data-modal-type="addMod">Add</button>
           {% endif %}
         </div>
         {% if g.project.mods %}
         <div id="mods">
           {% for mod in g.project.mods %}
-          <p class="mb-1">
+          <p class="mb-1 text-break">
             {% if g.owner %} <button class="btn px-1 far fa-trash-alt" data-index="{{ loop.index0 }}"></button> {% endif
             %}{{ mod }}
           </p>
@@ -155,28 +158,67 @@
     </div>
   </div>
 </div>
+<hr class="d-lg-block d-none">
+<div class="row">
+  <div id="updates" class="col-lg-7 col-12">
+    <div class="mb-4">
+      <h2 class="d-inline">Updates </h2>
+      {% if g.owner %}
+      <button class="btn btn-sm btn-primary" data-bs-target="#modal" data-bs-toggle="modal"
+        data-modal-type="newUpdate">New
+        Update</button>
+      {% endif %}
+    </div>
+    {% if g.project.updates %}
+    {% for update in g.project.updates|sort(attribute='created_at', reverse=True) %}
+    <div class=" update border rounded p-2 mb-2">
+      <div>
+        <div>
+          <span class="h4">{{ update.title }}</span>
+          <span class="small">{{ moment(update.created_at).fromNow(refresh=True) }}</span>{% if g.owner %}
+          <div class=" float-end dropdown d-inline">
+            <button class="dropdown-button navbar-toggler" type="button" data-bs-toggle="dropdown">
+              <i class="fas fa-ellipsis-v"></i>
+            </button>
+            <ul class="dropdown-menu">
+              <li>
+                <button class="dropdown-item" data-update-id="{{ update.id }}" data-modal-type="editUpdate"
+                  data-bs-target="#modal" data-bs-toggle="modal">
+                  Edit
+                </button>
+              </li>
+              <li>
+                <button class="dropdown-item"
+                  data-href="{{ url_for('project.delete_update',project_id=g.project.id, update_id=update.id) }} "
+                  data-bs-target="#deleteModal" data-bs-toggle="modal">
+                  Delete
+                </button>
+              </li>
+            </ul>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+      <p class="p-2 text-break">{{ update.content }}</p>
+    </div>
+    {% endfor %}
+    {% else %}
+    Nothing Here!
+    {% endif %}
+  </div>
+  <div class="col-lg-5 col-12">
+    <h2 class=" mb-4">Comments</h2>
+    {% if g.project.comments %}
+    {% else %}
+    No comments yet
+    {% endif %}
+  </div>
+</div>
 <script src="{{ url_for('static',filename='js/lightbox.js') }}"></script>
 <!-- Modals -->
-<div class="modal fade" id="followersModal" tabindex="-1">
-  <div class="modal-dialog modal-dialog-scrollable">
+<div class="modal fade" id="modal" tabindex="-1">
+  <div class="modal-dialog">
     <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Followers</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-      </div>
-      <div class="modal-body px-5">
-        <ul class="list-group list-group-flush">
-          {% for follower in g.project.followers %}
-          <li class="list-group-item">
-            <a href="{{ url_for('profile.show',username=follower.username) }}" class="h4 text-decoration-none">{{
-              follower.username }}</a>
-          </li>
-          {% endfor %}
-        </ul>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-      </div>
     </div>
   </div>
 </div>
@@ -200,47 +242,19 @@
     </div>
   </div>
 </div>
-<div class="modal fade" id="addModModal" tabindex="-1">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Add Mod</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-      </div>
-      <form action="{{ url_for('project.add_mod', project_id=g.project.id) }}" method="post">
-        <div class="modal-body">
-          {{ mod_form.hidden_tag() }}
-          {{ mod_form.mod(class='form-control') }}
-          {% for error in mod_form.mod.errors %}
-          {{ error }}
-          {% endfor %}
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-          <input type="submit" class="btn btn-success" value="Add"></input>
-        </div>
-      </form>
-    </div>
-  </div>
-</div>
+{# When confirming deletion, add the delete URL to the data-href attr on the modal toggle #}
 <div class="modal fade" id="deleteModal" tabindex="-1">
   <div class="modal-dialog">
     <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Are you sure?</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-      </div>
       <div class="modal-body">
-        Please confirm deletion
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-        <a href="/p/{{g.project.id}}/delete" class="btn btn-danger">Confirm</a>
+        Are you sure?
+        <div class="float-end">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <a id="confirm-delete" class="btn btn-danger">Delete</a>
+        </div>
       </div>
     </div>
   </div>
 </div>
-
-<script src="{{ url_for('project.static',filename='app.js') }}"></script>
 {% endif %}
 {% endblock %}

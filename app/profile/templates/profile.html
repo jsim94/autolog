@@ -33,9 +33,9 @@
             <p>{{ project.description }}</p>
           </div>
           {% if project.pictures[0] %}
-          <div class="col-4 rounded">
+          <div class="col-4">
             <img src="{{ url_for('static',filename='assets/project_pictures/'~project.pictures[0].filename) }}"
-              class="thumbnail img-fluid " alt="">
+              class="thumbnail img-fluid rounded" alt="">
           </div>
           {% endif %}
         </div>

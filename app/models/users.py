@@ -3,14 +3,15 @@
 from datetime import datetime
 
 from flask import g
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy.exc import NoResultFound
 from sqlalchemy.dialects.postgresql import ENUM
 from flask_bcrypt import Bcrypt
-from flask_login import UserMixin, login_user, logout_user
+from flask_login import UserMixin
 
 from app import db, lm
-from .mixins import uuid_pk
+from .mixins import base
 from .enums import PrivacyStatus
+
 
 from app.bcolors import bcolors
 
@@ -21,21 +22,22 @@ bcrypt = Bcrypt()
 @lm.user_loader
 def load_user(user_id):
     '''Get logged in user before request. Also adds user to flask global and updates last login time for user'''
-    user = User.get_by_id(user_id)
-    if user:
+    try:
+        user = User.get_by_id(user_id)
         g.current_user = user
-        user.update_login_time()
-        try:
-            db.session.commit()
-        except Exception as e:
-            print('ERROR WHEN UPDATING USER LOGIN', str(e))
-            db.session.rollback()
-    else:
+    except NoResultFound:
         g.current_user = None
+        return
+    try:
+        user.update_login_time()
+        db.session.commit()
+    except:
+        db.session.rollback()
+        raise
     return user
 
 
-class User(UserMixin, uuid_pk, db.Model):
+class User(UserMixin, base, db.Model):
     '''User model'''
     __tablename__ = 'users'
 
@@ -65,13 +67,22 @@ class User(UserMixin, uuid_pk, db.Model):
         return cls.query.filter_by(username=username).first()
 
     @classmethod
-    def get_by_id(cls, id):
-        '''Get user object by uuid search or return none.'''
-        return cls.query.filter_by(id=id).first()
+    def validate(cls, password, user=None, username=None, id=None):
+        '''Check if password hash matches and returns the user or None
 
-    def validate_password(self, password):
-        '''Check if password hash matches and returns True or False'''
-        return bcrypt.check_password_hash(self.password, password)
+        :param user: Passed user object to validate password for
+        :param id: Id of user to validate password for
+        :param username: str:username of user to validate password for
+        '''
+        if not user:
+            if username:
+                user = cls.get_by_username(username)
+            if id:
+                user = cls.get_by_id(id)
+
+        if user:
+            return user if bcrypt.check_password_hash(user.password, password) else None
+        return None
 
     def update_login_time(self):
         '''Update last login time'''
@@ -87,71 +98,15 @@ class User(UserMixin, uuid_pk, db.Model):
             email=email,
             password=hashed_pwd
         )
-
-        try:
-            db.session.add(user)
-            db.session.commit()
-        except IntegrityError:
-            db.session.rollback()
-            return
-
-        login_user(user, remember='remember')
+        db.session.add(user)
+        cls._commit()
         return user
 
-    @classmethod
-    def login(cls, username=None, password=None, user=None):
-        ''' Logs a user in and returns the user if username and password match or if the user object is passed in.'''
-        if user:
-            login_user(user, remember='remember')
-            return user
-
-        if username and password:
-            user = cls.get_by_username(username)
-            if user and user.validate_password(password):
-                login_user(user, remember='remember')
-                return user
-        return
-
-    def update(self, username, old_password, new_password, email):
-        ''' Validates password and updates user profile. Returns user if update is successful'''
-        if not self.validate_password(old_password):
-            return
-
-        self.username = username
-        self.password = bcrypt.generate_password_hash(
+    def edit(self, username, new_password, email):
+        '''Edits user object. Returns user'''
+        password = bcrypt.generate_password_hash(
             new_password).decode('UTF-8')
-        self.email = email
-
-        try:
-            db.session.commit()
-        except IntegrityError:
-            db.session.rollback()
-            return
-        return self
-
-    def logout(self):
-        '''Logsout current_user'''
-        logout_user()
-
-    def add_follow(self, project):
-        '''Add a project to a users following list'''
-        try:
-            self.following.append(project)
-            db.session.commit()
-            return 200
-        except:
-            db.session.rollback()
-            return 500
-
-    def remove_follow(self, project):
-        '''Remove a project to a users following list'''
-        try:
-            self.following.remove(project)
-            db.session.commit()
-            return 200
-        except:
-            db.session.rollback()
-            return 500
+        return super().edit(obj=self, username=username, password=password, email=email)
 
 
 class Follow(db.Model):
