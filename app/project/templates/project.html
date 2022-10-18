@@ -78,9 +78,22 @@
       {% endif %}
       {% endif %}
       {% if g.owner %}
-      <a class="btn btn-sm btn-warning" href="{{ url_for('project.edit', project_id=g.project.id) }}">Edit</a>
-      <button class="btn btn-sm btn-danger" data-href="{{ url_for('project.delete',project_id=g.project.id) }}"
-        data-bs-target="#deleteModal" data-bs-toggle="modal">Delete</button>
+      <div class=" float-end dropdown d-inline">
+        <button class="dropdown-button navbar-toggler" type="button" data-bs-toggle="dropdown">
+          <i class="fas fa-ellipsis-v"></i>
+        </button>
+        <ul class="dropdown-menu">
+          <li>
+            <a class="dropdown-item" href="{{ url_for('project.edit', project_id=g.project.id) }}">Edit</a>
+          </li>
+          <li>
+            <button class="dropdown-item" data-href="{{ url_for('project.delete',project_id=g.project.id) }}"
+              data-bs-target="#deleteModal" data-bs-toggle="modal">
+              Delete
+            </button>
+          </li>
+        </ul>
+      </div>
       {% endif %}
     </div>
     <div class=" row">
