@@ -8,7 +8,6 @@ from app import db
 from .mixins import base, timestamps
 from .enums import PrivacyStatus, Drivetrain
 from .users import User
-from app.bcolors import bcolors
 
 
 class Project(base, timestamps, db.Model):
@@ -148,7 +147,7 @@ class Comment(base, timestamps, db.Model):
         user = User.get_by_id(user_id)
         project = Project.get_by_id(project_id)
 
-        comment = Comment(
+        comment = cls(
             user_pk=user.pk, project_pk=project.pk, content=content)
         db.session.add(comment)
         cls._commit()

@@ -58,7 +58,6 @@ def get_modal_form(project_id):
         title = 'Edit Comment'
         url = url_for('project.edit_comment',
                       project_id=project_id, comment_id=comment_id)
-        print(url)
         comment = Comment.get_by_id(comment_id)
         return render_template('modal_form.html', title=title, url=url, form=CommentForm(obj=comment))
 
@@ -170,7 +169,7 @@ def add_picture(project_id):
     ip = request.remote_addr
     file = request.files['file']
 
-    image = ProjectPicture.add(file=file, project=g.project, ip=ip)
+    image = ProjectPicture.create(file=file, project=g.project, ip=ip)
 
     if image:
         return 'Success', 200
