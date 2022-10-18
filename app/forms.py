@@ -64,7 +64,7 @@ class EditProjectForm(NewProjectForm, FlaskForm):
 class AddModForm(FlaskForm):
     '''Form for adding a mod to a project'''
     mod = StringField('Describe Mod', validators=[
-                      Length(max=50)], render_kw={'autocomplete': 'off'})
+                      Length(max=50), InputRequired()], render_kw={'autocomplete': 'off'})
 
 
 class UpdateForm(FlaskForm):

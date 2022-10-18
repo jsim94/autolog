@@ -2,11 +2,13 @@
 
 {% block title %}Modlog - Edit{% endblock %}
 
-{% block subcontent %}
+{% block head %}
+{{ super() }}
 <link rel="stylesheet" href="{{ url_for('.static',filename='styles.css') }}">
+{% endblock %}
 
+{% block subcontent %}
 <h1>Edit Project</h1>
-
 <div class="row mt-4">
 
   <div class="col-12 col-lg-7">
@@ -25,13 +27,10 @@
           {{ error }}
           {% endfor %}
         </div>
-
       </div>
       {% endfor %}
-
       <input type="submit" value="Submit Changes" class="btn btn-success float-end mb-5">
     </form>
   </div>
-
 </div>
 {% endblock %}

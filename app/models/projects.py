@@ -144,7 +144,7 @@ class Comment(base, timestamps, db.Model):
 
     @classmethod
     def create(cls, user_id, project_id, content):
-        ''''''
+        '''Creates a new comment and attaches a user and project to it'''
         user = User.get_by_id(user_id)
         project = Project.get_by_id(project_id)
 

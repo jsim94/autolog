@@ -66,7 +66,8 @@ def get_modal_form(project_id):
 @bp.route('/<project_id>')
 def show(project_id):
     '''Retreives the page for the project car if found and if the requesting client has access to the page.'''
-    comment_form = CommentForm(user_id=g.current_user.id)
+    comment_form = CommentForm(
+        user_id=getattr(g, 'current_user', None).id)
     return render_template('project.html', comment_form=comment_form)
 
 

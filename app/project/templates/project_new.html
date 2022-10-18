@@ -1,18 +1,15 @@
 {% extends 'site_base.html' %}
 
 {% block title %}Modlog - New Project{% endblock %}
+{% block head %}
+{{ super() }}
+<link rel="stylesheet" href="{{ url_for('.static',filename='styles.css') }}">
+{% endblock %}
 
 {% block subcontent %}
-<link rel="stylesheet" href="{{ url_for('.static',filename='styles.css') }}">
-
 <h1>New Project</h1>
-
-
 <div class="row mt-4">
-
   <div class="col-12 col-lg-5 mb-3">
-
-
     <div class="row justify-content-between mb-2">
       <div class="col-auto">
         <label for="year-select" class="form-label">Year</label>
@@ -46,8 +43,6 @@
       </div>
     </div>
   </div>
-
-
   <div class="col-12 col-lg-7">
     <form method='post'>
       {% for hidden_field in form if hidden_field.widget.input_type == 'hidden' %}
@@ -64,16 +59,11 @@
           {{ error }}
           {% endfor %}
         </div>
-
       </div>
       {% endfor %}
-
       <input type="submit" value="Add Project Car" class="btn btn-success float-end mb-5">
     </form>
   </div>
-
 </div>
-
-
 <script src="static/populate_select_fields.js"></script>
 {% endblock %}

@@ -2,16 +2,17 @@
 
 {% block title %}Modlog - {{ g.project.name }}{% endblock %}
 
-{% block subcontent %}
-{{ moment.include_moment()}}
+{% block head %}
+{{ super() }}
 <link rel="stylesheet" href="{{ url_for('.static',filename='styles.css') }}">
 <link rel="stylesheet" href="{{ url_for('static',filename='stylesheets/lightbox.css') }}">
-{% if g.owner %}
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css"
   integrity="sha512-xh6O/CkQoPOWDdYTDqeRdPCVd1SpvCA9XXcUnZS2FmJNp1coAFzvtCN9BmamE+4aHK8yyUHUSCcJHgXloTyT2A=="
   crossorigin="anonymous" referrerpolicy="no-referrer" />
-{% endif %}
+{{ moment.include_moment()}}
+{% endblock %}
 
+{% block subcontent %}
 <div class="row">
   <div class="col-lg-6 col-12 mb-3">
     <div id="big-picture" class="carousel slide mb-3" data-bs-ride="false">
@@ -104,8 +105,9 @@
         <div id="mods">
           {% for mod in g.project.mods %}
           <p class="mb-1 text-break">
-            {% if g.owner %} <button class="btn px-1 far fa-trash-alt" data-index="{{ loop.index0 }}"></button> {% endif
-            %}{{ mod }}
+            {% if g.owner %} <button class="btn px-1 far fa-trash-alt" data-index="{{ loop.index0 }}"></button>
+            {% endif %}
+            {{ mod }}
           </p>
           {% endfor %}
         </div>
@@ -212,6 +214,7 @@
       {% if g.project.comments %}
       {% for comment in g.project.comments %}
       <li class="list-group-item">
+        {% if g.current_user == comment.user or g.owner %}
         <div class=" float-end dropdown d-inline">
           <button class="dropdown-button navbar-toggler" type="button" data-bs-toggle="dropdown">
             <i class="fas fa-ellipsis-v"></i>
@@ -225,7 +228,6 @@
               </button>
             </li>
             {% endif %}
-            {% if g.current_user == comment.user or g.owner %}
             <li>
               <button class="dropdown-item"
                 data-href="{{ url_for('project.delete_comment',project_id=g.project.id, comment_id=comment.id) }} "
@@ -233,9 +235,9 @@
                 Delete
               </button>
             </li>
-            {% endif %}
           </ul>
         </div>
+        {% endif %}
         <a href="{{ url_for('profile.show',username=comment.user.username) }}" class="small text-decoration-none">@{{
           comment.user.username }}</a>
         <p class="ms-2 mb-0">{{ comment.content }}</p>
@@ -266,6 +268,20 @@
     </div>
   </div>
 </div>
+{# When confirming deletion, add the delete URL to the data-href attr on the modal toggle #}
+<div class="modal fade" id="deleteModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-body">
+        Are you sure?
+        <div class="float-end">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <a id="confirm-delete" class="btn btn-danger">Delete</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 {% if g.owner %}
 <div class="modal fade" id="addPicture" tabindex="-1">
   <div class="modal-dialog">
@@ -282,20 +298,6 @@
       </div>
       <div class="modal-footer">
         <a href="{{ url_for('project.show',project_id=g.project.id) }}" class="btn btn-secondary">Close</a>
-      </div>
-    </div>
-  </div>
-</div>
-{# When confirming deletion, add the delete URL to the data-href attr on the modal toggle #}
-<div class="modal fade" id="deleteModal" tabindex="-1">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-body">
-        Are you sure?
-        <div class="float-end">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-          <a id="confirm-delete" class="btn btn-danger">Delete</a>
-        </div>
       </div>
     </div>
   </div>
