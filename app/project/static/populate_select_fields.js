@@ -16,9 +16,6 @@ const DRIVETRAIN_FIELD = $("#drivetrain");
 class CarQuery {
   constructor() {
     this.getYears();
-    // this.makes = null;
-    // this.models = null;
-    // this.trims = null;
 
     this.year = null;
     this.make = null;
@@ -33,7 +30,6 @@ class CarQuery {
 
   trimChange() {
     this.model_obj = this.trims.find((val) => val.value == TRIM_FIELD.val());
-    console.log(this.model_obj);
 
     HIDDEN_YEAR.val(this.model_obj.model_year);
     HIDDEN_MAKE.val(this.model_obj.model_make_display);

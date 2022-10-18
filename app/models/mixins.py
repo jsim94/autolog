@@ -71,7 +71,6 @@ class base(object):
         :param id: 
             The id of the object to be deleted. Must be called as a class method
         '''
-        print('click')
         if not obj:
             obj = cls.get_by_id(id)
 

@@ -65,5 +65,9 @@ function start() {
   $("#deleteModal").on("show.bs.modal", (e) => {
     $(this).find("#confirm-delete").attr("href", $(e.relatedTarget).data("href"));
   });
+
+  // initialize tooltips
+  const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+  const tooltipList = [...tooltipTriggerList].map((tooltipTriggerEl) => new bootstrap.Tooltip(tooltipTriggerEl));
 }
 $(document).ready(start);
