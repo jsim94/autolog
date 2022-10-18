@@ -11,7 +11,6 @@
   integrity="sha512-xh6O/CkQoPOWDdYTDqeRdPCVd1SpvCA9XXcUnZS2FmJNp1coAFzvtCN9BmamE+4aHK8yyUHUSCcJHgXloTyT2A=="
   crossorigin="anonymous" referrerpolicy="no-referrer" />
 {% endif %}
-<script src="{{ url_for('project.static',filename='app.js') }}"></script>
 
 <div class="row">
   <div class="col-lg-6 col-12 mb-3">
@@ -92,7 +91,7 @@
         Followers <button class="btn badge text-bg-primary" data-bs-target="#modal" data-bs-toggle="modal"
           data-modal-type="followers">
           {{g.project.followers|length}}</button>
-        <p class="mt-3">{{ g.project.description }}</p>
+        <p id="description" class="mt-3">{{ g.project.description }}</p>
         {% if g.project.mods or g.owner %}
         <div class="mb-2">
           <span class="h5">Mods </span>
@@ -160,7 +159,7 @@
 </div>
 <hr class="d-lg-block d-none">
 <div class="row">
-  <div id="updates" class="col-lg-7 col-12">
+  <div id="updates" class="col-lg-7 col-12 mb-2">
     <div class="mb-4">
       <h2 class="d-inline">Updates </h2>
       {% if g.owner %}
@@ -171,11 +170,12 @@
     </div>
     {% if g.project.updates %}
     {% for update in g.project.updates|sort(attribute='created_at', reverse=True) %}
-    <div class=" update border rounded p-2 mb-2">
+    <div class=" update border rounded p-2 mb-3">
       <div>
         <div>
-          <span class="h4">{{ update.title }}</span>
-          <span class="small">{{ moment(update.created_at).fromNow(refresh=True) }}</span>{% if g.owner %}
+          <span class="h5">{{ update.title }}</span>
+          <span class="small text-secondary">{{ moment(update.created_at).fromNow(refresh=True) }}</span>
+          {% if g.owner %}
           <div class=" float-end dropdown d-inline">
             <button class="dropdown-button navbar-toggler" type="button" data-bs-toggle="dropdown">
               <i class="fas fa-ellipsis-v"></i>
@@ -206,12 +206,56 @@
     Nothing Here!
     {% endif %}
   </div>
-  <div class="col-lg-5 col-12">
+  <div id="comments" class="col-lg-5 col-12 mb-3">
     <h2 class=" mb-4">Comments</h2>
-    {% if g.project.comments %}
-    {% else %}
-    No comments yet
-    {% endif %}
+    <ul class="list-group">
+      {% if g.project.comments %}
+      {% for comment in g.project.comments %}
+      <li class="list-group-item">
+        <div class=" float-end dropdown d-inline">
+          <button class="dropdown-button navbar-toggler" type="button" data-bs-toggle="dropdown">
+            <i class="fas fa-ellipsis-v"></i>
+          </button>
+          <ul class="dropdown-menu">
+            {% if g.current_user == comment.user %}
+            <li>
+              <button class="dropdown-item" data-comment-id="{{ comment.id }}" data-modal-type="editComment"
+                data-bs-target="#modal" data-bs-toggle="modal">
+                Edit
+              </button>
+            </li>
+            {% endif %}
+            {% if g.current_user == comment.user or g.owner %}
+            <li>
+              <button class="dropdown-item"
+                data-href="{{ url_for('project.delete_comment',project_id=g.project.id, comment_id=comment.id) }} "
+                data-bs-target="#deleteModal" data-bs-toggle="modal">
+                Delete
+              </button>
+            </li>
+            {% endif %}
+          </ul>
+        </div>
+        <a href="{{ url_for('profile.show',username=comment.user.username) }}" class="small text-decoration-none">@{{
+          comment.user.username }}</a>
+        <p class="ms-2 mb-0">{{ comment.content }}</p>
+        <span class="text-secondary small">{{ moment(comment.created_at).fromNow(refresh=True) }}</span>
+      </li>
+      {% endfor %}
+      {% endif %}
+      {% if g.current_user %}
+      <li class="list-group-item p-1">
+        <form action="{{ url_for('project.new_comment', project_id=g.project.id) }}" method="post">
+          {{ comment_form.hidden_tag() }}
+          {{ comment_form.user_id()}}
+          <div class="input-group">
+            {{ comment_form.content(class='form-control')}}
+            <input class="btn btn-outline-primary" type="submit" value="Submit">
+          </div>
+        </form>
+      </li>
+      {% endif %}
+    </ul>
   </div>
 </div>
 <script src="{{ url_for('static',filename='js/lightbox.js') }}"></script>
@@ -257,4 +301,5 @@
   </div>
 </div>
 {% endif %}
+<script src="{{ url_for('project.static',filename='app.js') }}"></script>
 {% endblock %}

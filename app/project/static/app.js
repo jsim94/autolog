@@ -1,4 +1,5 @@
 const postPath = window.location.pathname;
+const USER_INPUTS = $("#updates, #comments, #mods");
 
 async function deleteMod(e) {
   const index = $(e.target).data("index");
@@ -22,31 +23,30 @@ function confirmDelete(e) {
 }
 
 function linkify() {
+  // Turns plaintext links into anchor tags
   const regex = /(\b((https?:\/\/)|(www\.))[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/gi;
-  $("#updates").html(function (i, html) {
-    return html.replace(regex, function (link, i, i, http) {
-      console.log(link, "|", http);
-      return `<a href="${!http ? "http://" : ""}${link}" rel="nofollow noreferrer">${link}</a>`;
+  USER_INPUTS.each((i, element) => {
+    $(element).html(function (i, html) {
+      return html.replace(regex, function (link, i, i, http) {
+        return `<a href="${!http ? "http://" : ""}${link}" rel="nofollow noreferrer">${link}</a>`;
+      });
     });
   });
-  const links = $("#updates a");
 }
 
 async function populateModal(e) {
   const type = $(e.relatedTarget).data("modal-type");
   const updateId = $(e.relatedTarget).data("update-id");
+  const commentId = $(e.relatedTarget).data("comment-id");
   const modalContent = $("#modal .modal-content");
-
-  console.log(updateId);
 
   const res = await axiosCSRF.get(`${postPath}/get-form`, {
     params: {
       form: type,
       updateId: updateId,
+      commentId: commentId,
     },
   });
-
-  console.log(res);
   modalContent.html(res.data);
 }
 

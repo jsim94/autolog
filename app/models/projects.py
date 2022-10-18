@@ -7,7 +7,7 @@ from sqlalchemy.exc import NoResultFound
 from app import db
 from .mixins import base, timestamps
 from .enums import PrivacyStatus, Drivetrain
-
+from .users import User
 from app.bcolors import bcolors
 
 
@@ -112,14 +112,6 @@ class Project(base, timestamps, db.Model):
         self.mods.pop(index)
         self._commit()
 
-    def add_update(self, title, content):
-        '''Creates a new row in updates table and appends it to the project'''
-
-        update = Update(project_pk=self.pk, title=title.rstrip(),
-                        content=content.rstrip())
-        db.session.add(update)
-        self._commit()
-
 
 class Update(base, timestamps, db.Model):
     '''Table that holds update posts to a project'''
@@ -130,6 +122,15 @@ class Update(base, timestamps, db.Model):
     title = db.Column(db.String(60))
     content = db.Column(db.String(1000), nullable=False)
 
+    @classmethod
+    def create(cls, project_id, title, content):
+        '''Creates a new row in updates table and appends it to a project'''
+        project = Project.get_by_id(project_id)
+        update = Update(project_pk=project.pk, title=title.rstrip(),
+                        content=content.rstrip())
+        db.session.add(update)
+        cls._commit()
+
 
 class Comment(base, timestamps, db.Model):
     '''Table that holds comments other users can make for a project '''
@@ -139,4 +140,16 @@ class Comment(base, timestamps, db.Model):
         'users.pk', ondelete="cascade"), nullable=False)
     project_pk = db.Column(db.Integer, db.ForeignKey(
         'projects.pk', ondelete="cascade"), nullable=False)
-    content = db.Column(db.Text, nullable=False)
+    content = db.Column(db.String(300), nullable=False)
+
+    @classmethod
+    def create(cls, user_id, project_id, content):
+        ''''''
+        user = User.get_by_id(user_id)
+        project = Project.get_by_id(project_id)
+
+        comment = Comment(
+            user_pk=user.pk, project_pk=project.pk, content=content)
+        db.session.add(comment)
+        cls._commit()
+        return comment

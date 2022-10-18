@@ -63,11 +63,20 @@ class EditProjectForm(NewProjectForm, FlaskForm):
 
 class AddModForm(FlaskForm):
     '''Form for adding a mod to a project'''
-    mod = StringField('Describe Mod', validators=[Length(max=50)])
+    mod = StringField('Describe Mod', validators=[
+                      Length(max=50)], render_kw={'autocomplete': 'off'})
 
 
 class UpdateForm(FlaskForm):
     '''Form for adding an update to a project'''
-    title = StringField('Title', validators=[Length(max=60)])
+    title = StringField('Title', validators=[Length(
+        max=60)], render_kw={'autocomplete': 'off'})
     content = StringField('Post your new update',
-                          widget=TextArea(), validators=[Length(max=750), InputRequired()])
+                          widget=TextArea(), validators=[Length(max=750), InputRequired()], render_kw={'autocomplete': 'off'})
+
+
+class CommentForm(FlaskForm):
+    '''Form for adding a comment to a project'''
+    content = StringField('', validators=[
+                          Length(max=250), InputRequired()], render_kw={'placeholder': 'Comment', 'autocomplete': 'off'})
+    user_id = HiddenField('user_id')

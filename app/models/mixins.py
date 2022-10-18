@@ -57,6 +57,8 @@ class base(object):
             else:
                 msg = 'No attr \'' + key + '\' found in table columns'
                 raise AttributeError(msg)
+        if 'is_edited' in cls.__table__.columns:
+            obj.is_edited = True
         cls._commit()
         return obj
 
@@ -83,3 +85,4 @@ class timestamps(object):
                            default=datetime.utcnow)
     last_edit = db.Column(db.DateTime, nullable=False,
                           default=datetime.utcnow, onupdate=datetime.utcnow)
+    is_edited = db.Column(db.Boolean, default=False)
