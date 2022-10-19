@@ -72,8 +72,8 @@ def login():
     form = LoginForm()
 
     if form.validate_on_submit():
-        user = User.validate(username=form.username.data,
-                             password=form.password.data)
+        user = User.authenticate(username=form.username.data,
+                                 password=form.password.data)
         if user:
             login_user(user, remember='remember')
             return redirect(url_for('profile.show', username=user.username))

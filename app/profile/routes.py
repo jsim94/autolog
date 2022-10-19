@@ -1,13 +1,11 @@
 # app > profile > routes.py
 
-from sqlalchemy.exc import NoResultFound
+from sqlalchemy.exc import NoResultFound, IntegrityError
 from flask import render_template, redirect, g, url_for, abort, flash
 from flask_login import login_required, current_user
 
 from app.models.users import User
-# from app.models.images import ProfilePicture
 from app.forms import UserEdit
-from app.utils import owner_required
 
 from . import bp
 
@@ -15,7 +13,7 @@ from . import bp
 @bp.url_value_preprocessor
 def get_profile_owner(endpoint, values):
     try:
-        g.user = User.get_by_username(username=values.get('username'))
+        g.user = User.get_by_username(username=values['username'])
         g.owner = True if g.user == current_user else False
     except NoResultFound:
         abort(404)
@@ -47,29 +45,23 @@ def edit():
         new_password = form.password.data
         email = form.email.data
 
-        if User.validate(user=current_user, password=old_password):
-            user = current_user.edit(
-                username=username,
-                new_password=new_password,
-                email=email
-            )
-        if user:
-            flash('Profile successfully updated', 'info')
-            return redirect(url_for('profile.show', username=user.username))
-        flash('Error occurred')
-
+        if User.authenticate(user=current_user, password=old_password):
+            try:
+                user = User.edit(
+                    obj=current_user,
+                    username=username,
+                    new_password=new_password,
+                    email=email
+                )
+                if user:
+                    flash('Profile successfully updated', 'info')
+                    return redirect(url_for('profile.show', username=user.username))
+                flash('Error occured', 'error')
+            except IntegrityError:
+                flash('Username or email already taken', 'danger')
+        else:
+            flash('Wrong password', 'warning')
     return render_template('profile_edit.html', form=form, user=current_user)
-
-
-# @bp.route('/profile-picture', methods=['POST'])
-# @login_required
-# def change_profile_picture():
-#     ''''''
-#     print(request.files)
-#     image = request.files['image']
-
-#     profile_picture = ProfilePicture(image)
-#     return redirect(request.referrer)
 
 
 @bp.route('/<username>/following')

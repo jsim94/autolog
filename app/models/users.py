@@ -64,10 +64,13 @@ class User(UserMixin, base, db.Model):
     @classmethod
     def get_by_username(cls, username):
         '''Get user object by username search or return none.'''
-        return cls.query.filter_by(username=username).first()
+        result = cls.query.filter_by(username=username).first()
+        if result:
+            return result
+        raise NoResultFound()
 
     @classmethod
-    def validate(cls, password, user=None, username=None, id=None):
+    def authenticate(cls, password, user=None, username=None, id=None):
         '''Check if password hash matches and returns the user or None
 
         :param user: Passed user object to validate password for
@@ -102,11 +105,13 @@ class User(UserMixin, base, db.Model):
         cls._commit()
         return user
 
-    def edit(self, username, new_password, email):
+    @classmethod
+    def edit(cls, obj=None, username=None, new_password=None, email=None):
         '''Edits user object. Returns user'''
         password = bcrypt.generate_password_hash(
             new_password).decode('UTF-8')
-        return super().edit(obj=self, username=username, password=password, email=email)
+
+        return super().edit(obj=obj, username=username, password=password, email=email)
 
 
 class Follow(db.Model):
