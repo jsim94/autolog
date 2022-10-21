@@ -41,7 +41,7 @@ class NewProjectForm(FlaskForm):
     model = HiddenField('model')
     model_id = HiddenField('model_id')
     name = StringField('Project Name', validators=[
-                       InputRequired(), Length(max=32)])
+                       InputRequired(), Length(min=4, max=32)])
     description = StringField('Description', validators=[
         Length(max=500)], widget=TextArea())
     private = RadioField('Visibility', default='PUBLIC',

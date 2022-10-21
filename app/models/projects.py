@@ -1,5 +1,6 @@
 # app > models > projects.py
 
+from sqlalchemy import CheckConstraint
 from sqlalchemy.dialects.postgresql import ARRAY, ENUM
 from sqlalchemy.ext.mutable import MutableList
 from sqlalchemy.exc import NoResultFound
@@ -8,6 +9,7 @@ from app import db
 from .mixins import base, timestamps
 from .enums import PrivacyStatus, Drivetrain
 from .users import User
+from ..utils import assert_in_range
 
 
 class Project(base, timestamps, db.Model):
@@ -19,8 +21,10 @@ class Project(base, timestamps, db.Model):
     private = db.Column(ENUM(PrivacyStatus), nullable=False,
                         server_default="PUBLIC")
     model_id = db.Column(db.Integer, nullable=True)
-    name = db.Column(db.String(30))
-    description = db.Column(db.String(500))
+    name = db.Column(db.String(30), CheckConstraint(
+        "LENGTH(name) >= 4"))
+    description = db.Column(
+        db.String(500))
     mods = db.Column(MutableList.as_mutable(ARRAY(db.String(50))), default=[])
 
     year = db.Column(db.Text, nullable=True)
@@ -84,25 +88,18 @@ class Project(base, timestamps, db.Model):
         return project
 
     def add_follow(self, user):
-        '''Add a user to a projects followers list
-
-        :param project: project instance
-        :param id: id of project instance
-        '''
+        '''Add a user to a projects followers list'''
         self.followers.append(user)
         self._commit()
 
     def remove_follow(self, user):
-        '''Remove a user to a projects followers list
-
-        :param project: project instance
-        :param id: id of project instance
-        '''
+        '''Remove a user to a projects followers list'''
         self.followers.remove(user)
         self._commit()
 
     def add_mod(self, mod):
         '''Add mod to projects mod list'''
+        assert_in_range(len(mod), 1, 50)
         self.mods.append(mod)
         self._commit()
 

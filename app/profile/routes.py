@@ -50,7 +50,7 @@ def edit():
                 user = User.edit(
                     obj=current_user,
                     username=username,
-                    new_password=new_password,
+                    password=new_password,
                     email=email
                 )
                 if user:

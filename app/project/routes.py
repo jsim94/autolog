@@ -69,8 +69,12 @@ def show(project_id):
     if g.project.private.value == 'PRIVATE' and not g.owner:
         abort(404)
 
-    comment_form = CommentForm(
-        user_id=getattr(g, 'current_user', None).id)
+    try:
+        comment_form = CommentForm(
+            user_id=getattr(g, 'current_user').id)
+    except AttributeError:
+        comment_form = None
+
     return render_template('project.html', comment_form=comment_form)
 
 

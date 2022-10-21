@@ -53,7 +53,8 @@ class base(object):
 
         for key, value in keys.items() if keys else kwargs.items():
             if key in cls.__table__.columns:
-                setattr(obj, key, value)
+                if value is not None:
+                    setattr(obj, key, value)
             else:
                 msg = 'No attr \'' + key + '\' found in table columns'
                 raise AttributeError(msg)
