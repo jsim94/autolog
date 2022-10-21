@@ -10,7 +10,7 @@ class Config:
         'SECRET_KEY', "72b13325f1a7c86d105120dcb57bd97e36a86157a4abb8e3fe66eaa0395097ab")
     FLASK_APP = environ.get('FLASK_APP')
     TESTING = bool(environ.get('TESTING', 'False'))
-    UPLOAD_FOLDER = environ.get('UPLOAD_FOLDER', 'app/static/uploads')
+    UPLOAD_FOLDER = environ.get('UPLOAD_FOLDER', 'app/static/assets/uploads')
 
     DEBUG_TB_INTERCEPT_REDIRECTS = False
 

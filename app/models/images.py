@@ -8,6 +8,12 @@ from app import db
 from .mixins import base, timestamps
 
 
+if not os.path.exists(current_app.config['UPLOAD_FOLDER']):
+    os.mkdir(current_app.config['UPLOAD_FOLDER'])
+    print('Created user upload directory:',
+          current_app.config['UPLOAD_FOLDER'])
+
+
 class ImageBase(base, timestamps, object):
     '''Base picture class'''
     upload_ip = db.Column(db.Text, nullable=False)
@@ -18,8 +24,13 @@ class ImageBase(base, timestamps, object):
         return f'{self.id}.{self.extension}'
 
     @classmethod
-    def create(cls, file, project, ip, thumbnail=False):
+    def create(cls, file, project, ip):
         '''USE THIS to add any image to the database'''
+        def check_dir(path):
+            '''Checks if path exists and creates it if it doesn't.'''
+            if not os.path.exists(path):
+                os.makedir(path)
+
         ext = secure_filename(file.filename).split('.')[-1]
         if ext not in ['png', 'jpg', 'jpeg', 'gif']:
             raise ValueError('Incorrect Filetype')
@@ -30,11 +41,28 @@ class ImageBase(base, timestamps, object):
         try:
             file.seek(0)
             img = Image.open(file.stream)
-            img.save(os.path.join(cls.PATH, picture.filename),
-                     optimize=True, quality=75)
+            try:
+                print(os.path.join(cls.PATH, picture.filename))
+                img.save(os.path.join(cls.PATH, picture.filename),
+                         optimize=True, quality=75)
+            except FileNotFoundError:
+                if os.path.exists(cls.PATH):
+                    raise
+                os.makedirs(cls.PATH)
+                img.save(os.path.join(cls.PATH, picture.filename),
+                         optimize=True, quality=75)
+
             if cls.TB_SIZE:
                 img.thumbnail(cls.TB_SIZE)
-                img.save(os.path.join(cls.PATH, 'thumbnails/', picture.filename))
+                tb_path = os.path.join(cls.PATH, 'thumbnails')
+                try:
+                    img.save(os.path.join(tb_path, picture.filename))
+                except FileNotFoundError:
+                    if os.path.exists(tb_path):
+                        raise
+                    os.makedirs(tb_path)
+                    img.save(os.path.join(tb_path, picture.filename))
+
         except:
             db.session.delete(picture)
             db.session.commit()

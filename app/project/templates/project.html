@@ -20,9 +20,9 @@
         {% if g.project.pictures %}
         {% for picture in g.project.pictures %}
         <div class="carousel-item{% if loop.index0 == 0%} active{% endif %}">
-          <a href="{{ url_for('static', filename='assets/project_pictures/'~picture.filename) }}"
+          <a href="{{ url_for('static', filename='assets/uploads/project_pictures/'~picture.filename) }}"
             data-lightbox="gallery">
-            <img src="{{ url_for('static', filename='assets/project_pictures/'~picture.filename) }}"
+            <img src="{{ url_for('static', filename='assets/uploads/project_pictures/'~picture.filename) }}"
               class="d-block w-100">
           </a>
         </div>
@@ -47,7 +47,7 @@
       {% for picture in g.project.pictures %}
       <div class="col-xl-3 col-4">
         <img class="w-100 rounded" data-bs-target="#big-picture" data-bs-slide-to="{{ loop.index0 }}"
-          src="{{ url_for('static', filename='assets/project_pictures/thumbnails/'~picture.filename) }}" alt="">
+          src="{{ url_for('static', filename='assets/uploads/project_pictures/thumbnails/'~picture.filename) }}" alt="">
         {% if g.owner %}
         <button class="delete-pic btn btn-sm btn-outline-secondary text-decoration-none mt-1">Remove</button>
         <a href="{{ url_for('project.delete_picture', project_id=g.project.id,picture_id=picture.id) }}"
