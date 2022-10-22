@@ -31,6 +31,8 @@ class SignupForm(FlaskForm):
 class UserEdit(SignupForm, FlaskForm):
     '''Form for user update'''
     old_password = PasswordField('Old Password')
+    private = RadioField('Visibility', default='PUBLIC',
+                         choices=PrivacyStatus.choices)
 
 
 class NewProjectForm(FlaskForm):

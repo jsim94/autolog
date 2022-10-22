@@ -115,7 +115,7 @@ class User(UserMixin, base, db.Model):
         return user
 
     @classmethod
-    def edit(cls, obj=None, username=None, password=None, email=None):
+    def edit(cls, obj=None, username=None, password=None, email=None, private=None):
         '''Edits user object. Returns user'''
         hashed_password = cls._generate_password(
             password=password) if password else None

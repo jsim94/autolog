@@ -26,11 +26,6 @@ class ImageBase(base, timestamps, object):
     @classmethod
     def create(cls, file, project, ip):
         '''USE THIS to add any image to the database'''
-        def check_dir(path):
-            '''Checks if path exists and creates it if it doesn't.'''
-            if not os.path.exists(path):
-                os.makedir(path)
-
         ext = secure_filename(file.filename).split('.')[-1]
         if ext not in ['png', 'jpg', 'jpeg', 'gif']:
             raise ValueError('Incorrect Filetype')
@@ -42,7 +37,6 @@ class ImageBase(base, timestamps, object):
             file.seek(0)
             img = Image.open(file.stream)
             try:
-                print(os.path.join(cls.PATH, picture.filename))
                 img.save(os.path.join(cls.PATH, picture.filename),
                          optimize=True, quality=75)
             except FileNotFoundError:

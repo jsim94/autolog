@@ -18,14 +18,22 @@
     </div>
   </div>
   <div class="col-12 col-lg-9">
-    <form method="post">
-      {{ form.hidden_tag() }}
-      {% for field in form if field.widget.input_type != 'hidden' %}
-      {% for error in field.errors %}
-      <span class="text-danger">{{ error }}</span>
+    <form method='post'>
+      {% for hidden_field in form if hidden_field.widget.input_type == 'hidden' %}
+      {{ hidden_field() }}
       {% endfor %}
-      {{ field.label(class="text-align-start") }}
-      {{ field(class="form-control mb-2") }}
+      {% for field in form if field.widget.input_type != 'hidden' %}
+      <div class="row justify-content-between mb-2">
+        <div class="col-auto ms-lg-3">
+          {{ field.label(class="form-label")}}
+        </div>
+        <div class="col-lg-8 text-start">
+          {{ field(class="w-100") }}
+          {% for error in field.errors %}
+          {{ error }}
+          {% endfor %}
+        </div>
+      </div>
       {% endfor %}
       <input type="submit" class="btn btn-success float-end" value="Save Changes">
     </form>

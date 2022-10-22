@@ -44,6 +44,7 @@ def edit():
         old_password = form.old_password.data
         new_password = form.password.data
         email = form.email.data
+        private = form.private.data
 
         if User.authenticate(user=current_user, password=old_password):
             try:
@@ -51,7 +52,8 @@ def edit():
                     obj=current_user,
                     username=username,
                     password=new_password,
-                    email=email
+                    email=email,
+                    private=private
                 )
                 if user:
                     flash('Profile successfully updated', 'info')
