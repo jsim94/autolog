@@ -28,8 +28,7 @@
             g.current_user.username }}</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link"
-            href="{{ url_for('profile.show_following',username=current_user.username) }}">Following</a>
+          <a class="nav-link" href="{{ url_for('profile.show_following') }}">Following</a>
         </li>
         <li class="nav-item">
           <a class="nav-link" href="{{ url_for('logout') }}">Logout</a>

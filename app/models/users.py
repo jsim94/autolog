@@ -101,14 +101,15 @@ class User(UserMixin, base, db.Model):
         self.last_login = datetime.utcnow()
 
     @classmethod
-    def signup(cls, username, email, password):
+    def signup(cls, username, email, password, private='PUBLIC'):
         '''Create new user:
             Hash password and add the new user to session. Returns None if duplicate email or username is found'''
         hashed_pwd = cls._generate_password(password=password)
         user = User(
             username=username,
             email=email,
-            password=hashed_pwd
+            password=hashed_pwd,
+            private=private
         )
         db.session.add(user)
         cls._commit()

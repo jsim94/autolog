@@ -5,7 +5,7 @@
 {% block subcontent %}
 
 <h1>Followed Projects</h1>
-{% for project in g.user.following %}
+{% for project in g.current_user.following %}
 <div class="mb-2">
   <a href="{{ url_for('project.show', project_id=project.id) }}" class="text-reset text-decoration-none">
     <div class="border rounded p-2">

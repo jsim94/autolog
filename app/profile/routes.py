@@ -66,6 +66,6 @@ def edit():
     return render_template('profile_edit.html', form=form, user=current_user)
 
 
-@bp.route('/<username>/following')
-def show_following(username):
+@bp.route('/following')
+def show_following():
     return render_template('profile_following.html')
