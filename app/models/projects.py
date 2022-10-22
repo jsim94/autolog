@@ -87,13 +87,27 @@ class Project(base, timestamps, db.Model):
         cls._commit()
         return project
 
-    def add_follow(self, user):
-        '''Add a user to a projects followers list'''
+    def add_follow(self, user=None, id=None):
+        '''Add a user to a projects followers list
+
+        :param user: passed user to add to followers
+        :param id: id of user to add to followers
+        '''
+        if not user:
+            user = User.get_by_id(id)
+
         self.followers.append(user)
         self._commit()
 
-    def remove_follow(self, user):
-        '''Remove a user to a projects followers list'''
+    def remove_follow(self, user=None, id=None):
+        '''Remove a user to a projects followers list
+
+        :param user: passed user to add to followers
+        :param id: id of user to add to followers
+        '''
+        if not user:
+            user = User.get_by_id(id)
+
         self.followers.remove(user)
         self._commit()
 
@@ -116,7 +130,8 @@ class Update(base, timestamps, db.Model):
     project_pk = db.Column(db.Integer, db.ForeignKey(
         'projects.pk', ondelete="cascade"))
     title = db.Column(db.String(60))
-    content = db.Column(db.String(1000), nullable=False)
+    content = db.Column(db.String(1000), CheckConstraint(
+        "LENGTH(content) > 0"), nullable=False)
 
     @classmethod
     def create(cls, project_id, title, content):
@@ -126,6 +141,7 @@ class Update(base, timestamps, db.Model):
                         content=content.rstrip())
         db.session.add(update)
         cls._commit()
+        return update
 
 
 class Comment(base, timestamps, db.Model):
@@ -136,7 +152,8 @@ class Comment(base, timestamps, db.Model):
         'users.pk', ondelete="cascade"), nullable=False)
     project_pk = db.Column(db.Integer, db.ForeignKey(
         'projects.pk', ondelete="cascade"), nullable=False)
-    content = db.Column(db.String(300), nullable=False)
+    content = db.Column(db.String(300), CheckConstraint(
+        "LENGTH(content) > 0"), nullable=False)
 
     @classmethod
     def create(cls, user_id, project_id, content):
