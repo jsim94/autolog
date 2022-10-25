@@ -1,15 +1,14 @@
 # app > project > route.py
-
+import os
 from sqlalchemy.exc import NoResultFound
-from flask import render_template, request, redirect, url_for, g, flash, abort
+from flask import current_app, render_template, request, redirect, url_for, g, flash, abort
 from flask_login import current_user, login_required
 
 from . import bp
 from app.models.projects import Project, Update, Comment
 from app.models.images import ProjectPicture
-
 from app.forms import NewProjectForm, EditProjectForm, AddModForm, UpdateForm, CommentForm
-from app.utils import owner_required
+from app.utils import owner_required, save_image_file, delete_image_file
 
 from app.bcolors import bcolors
 
@@ -25,6 +24,9 @@ def get_project_object(endpoint, values):
     except KeyError:
         return
 
+    if g.project.private == 'PRIVATE' and not g.owner:
+        abort(403)
+
 
 @bp.route('/<project_id>/get-form')
 def get_modal_form(project_id):
@@ -34,11 +36,15 @@ def get_modal_form(project_id):
     comment_id = request.args.get('commentId')
 
     if type == 'newUpdate':
+        if not g.owner:
+            abort(403)
         title = 'New Post'
         url = url_for('project.new_update', project_id=project_id)
         return render_template('modal_form.html', form=UpdateForm(), title=title, url=url)
 
     if type == 'editUpdate':
+        if not g.owner:
+            abort(403)
         title = 'Update Post'
         url = url_for('project.edit_update',
                       project_id=project_id, update_id=update_id)
@@ -46,6 +52,8 @@ def get_modal_form(project_id):
         return render_template('modal_form.html', form=UpdateForm(obj=update), title=title, url=url)
 
     if type == 'addMod':
+        if not g.owner:
+            abort(403)
         title = 'Add Mod'
         url = url_for('project.add_mod', project_id=project_id)
         return render_template('modal_form.html', form=AddModForm(), title=title, url=url)
@@ -55,11 +63,15 @@ def get_modal_form(project_id):
         return render_template('modal_followers.html', title=title)
 
     if type == 'editComment':
+        if not current_user:
+            abort(403)
         title = 'Edit Comment'
         url = url_for('project.edit_comment',
                       project_id=project_id, comment_id=comment_id)
         comment = Comment.get_by_id(comment_id)
         return render_template('modal_form.html', title=title, url=url, form=CommentForm(obj=comment))
+
+    abort(400)
 
 
 @bp.route('/<project_id>')
@@ -173,7 +185,14 @@ def add_picture(project_id):
     ip = request.remote_addr
     file = request.files['file']
 
-    image = ProjectPicture.create(file=file, project=g.project, ip=ip)
+    image = ProjectPicture.create(
+        filename=file.filename, project=g.project, ip=ip)
+    save_image_file(
+        file=file,
+        fn=image.filename,
+        path=os.path.join(
+            current_app.config['UPLOAD_FOLDER'], 'project_pictures'),
+        tb_size=(350, 350))
 
     if image:
         return 'Success', 200
@@ -185,7 +204,12 @@ def add_picture(project_id):
 def delete_picture(project_id, picture_id):
     '''Route to remove a picture from a users project'''
     try:
-        ProjectPicture.delete(id=picture_id)
+        image = ProjectPicture.get_by_id(id=picture_id)
+        ProjectPicture.delete(obj=image)
+        delete_image_file(
+            fn=image.filename,
+            path=os.path.join(
+                current_app.config['UPLOAD_FOLDER'], 'project_pictures'))
     except AttributeError:
         abort(404)
     except FileNotFoundError as e:

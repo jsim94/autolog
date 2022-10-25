@@ -9,33 +9,14 @@ from sqlalchemy.dialects.postgresql import ENUM
 from flask_bcrypt import Bcrypt
 from flask_login import UserMixin
 
-from app import db, lm
+from . import db
 from .mixins import base
 from .enums import PrivacyStatus
 from ..utils import assert_in_range
 
 from app.bcolors import bcolors
 
-
 bcrypt = Bcrypt()
-
-
-@lm.user_loader
-def load_user(user_id):
-    '''Get logged in user before request. Also adds user to flask global and updates last login time for user'''
-    try:
-        user = User.get_by_id(user_id)
-        g.current_user = user
-    except NoResultFound:
-        g.current_user = None
-        return
-    try:
-        user.update_login_time()
-        db.session.commit()
-    except:
-        db.session.rollback()
-        raise
-    return user
 
 
 class User(UserMixin, base, db.Model):
@@ -99,6 +80,7 @@ class User(UserMixin, base, db.Model):
     def update_login_time(self):
         '''Update last login time'''
         self.last_login = datetime.utcnow()
+        self._commit()
 
     @classmethod
     def signup(cls, username, email, password, private='PUBLIC'):

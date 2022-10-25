@@ -2,17 +2,32 @@
 
 from functools import wraps
 
-from sqlalchemy.exc import IntegrityError
-from flask import current_app as app, render_template, redirect, url_for, flash, request
+from sqlalchemy.exc import IntegrityError, NoResultFound
+from flask import current_app as app, render_template, redirect, url_for, flash, request, g
 from flask_login import current_user, login_required, login_user, logout_user
 
+from . import bp
+from app import lm
 from app.forms import SignupForm, LoginForm
 from app.models.users import User
 
 from app.bcolors import bcolors
 
 
-@app.before_request
+@lm.user_loader
+def load_user(user_id):
+    '''Get logged in user before request. Also adds user to flask global and updates last login time for user'''
+    try:
+        user = User.get_by_id(user_id)
+        user.update_login_time()
+        g.current_user = user
+    except NoResultFound:
+        g.current_user = None
+        return
+    return user
+
+
+@bp.before_request
 def mark_console():
     '''debug purposes only'''
     if app.debug:
@@ -38,14 +53,14 @@ def user_redirect(f):
     return wrapper
 
 
-@app.route('/')
+@bp.route('/')
 @user_redirect
 def homepage():
     '''Displays homepage'''
     return render_template('home.html')
 
 
-@app.route('/signup', methods=('GET', 'POST'))
+@bp.route('/signup', methods=('GET', 'POST'))
 @user_redirect
 def signup():
     '''GET returns signup form, POST submits new user into database and redirects user to profile page'''
@@ -57,7 +72,7 @@ def signup():
                                email=form.email.data, password=form.password.data)
         except IntegrityError:
             flash("Username or email already taken", 'danger')
-            return redirect(url_for('signup'))
+            return redirect(url_for('root.signup'))
 
         login_user(user, remember='remember')
         return redirect(url_for('profile.show', username=user.username))
@@ -65,7 +80,7 @@ def signup():
     return render_template('home_form.html', form=form, signup=True)
 
 
-@app.route('/login', methods=('GET', 'POST'))
+@bp.route('/login', methods=('GET', 'POST'))
 @user_redirect
 def login():
     '''GET returns login form, POST submits login parameters and redirects user to their profile page'''
@@ -78,15 +93,15 @@ def login():
             login_user(user, remember='remember')
             return redirect(url_for('profile.show', username=user.username))
         flash("Invalid username or password", 'danger')
-        return redirect(url_for('login'))
+        return redirect(url_for('root.login'))
 
     return render_template('home_form.html', form=form, signup=False)
 
 
-@app.route('/logout')
+@bp.route('/logout')
 @login_required
 def logout():
     '''Log out user'''
     logout_user()
     flash('Successfully logged out')
-    return redirect(url_for('homepage'))
+    return redirect(url_for('root.homepage'))

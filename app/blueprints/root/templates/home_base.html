@@ -2,11 +2,6 @@
 
 {% block title %}Welcome to Modlog{% endblock %}
 
-{% block head %}
-{{ super() }}
-<link rel="stylesheet" href="{{ url_for('static',filename='stylesheets/styles.css') }}">
-{% endblock %}
-
 {% block content %}
 <div class="bg">
   <div class="h-75 d-flex align-items-center justify-content-center">
@@ -16,7 +11,7 @@
           {% for category, message in get_flashed_messages(with_categories=True) %}
           <div class="alert alert-{{ category }}">{{ message }}</div>
           {% endfor %}
-          <h1><a class="text-reset text-decoration-none" href="/">Modlog</a></h1>
+          <h1>Modlog</h1>
           {% block subcontent %}
           {% endblock %}
         </div>

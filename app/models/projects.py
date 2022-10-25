@@ -5,7 +5,7 @@ from sqlalchemy.dialects.postgresql import ARRAY, ENUM
 from sqlalchemy.ext.mutable import MutableList
 from sqlalchemy.exc import NoResultFound
 
-from app import db
+from . import db
 from .mixins import base, timestamps
 from .enums import PrivacyStatus, Drivetrain
 from .users import User

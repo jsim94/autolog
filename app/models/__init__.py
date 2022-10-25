@@ -1,7 +1,9 @@
 '''Initializes SQLalchemy models from each module'''
 # app > models > __init__.py
+from flask_sqlalchemy import SQLAlchemy
+from flask_sqlalchemy.track_modifications import models_committed
 
-from flask_sqlalchemy import models_committed
+db = SQLAlchemy()
 
 from .users import *
 from .projects import *

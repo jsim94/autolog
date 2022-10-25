@@ -1,15 +1,10 @@
 # app > models > mixins.py
-
-import uuid
 from datetime import datetime
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.sql import func
 from sqlalchemy.exc import NoResultFound
 
-from app import db
-
-
-def generate_uuid_hex():
-    return uuid.uuid4().hex
+from . import db
+from app.utils import generate_uuid_hex
 
 
 class base(object):
@@ -82,7 +77,7 @@ class base(object):
 class timestamps(object):
     '''Mixin for creation date and auto last_edit date columns'''
     created_at = db.Column(db.DateTime, nullable=False,
-                           default=datetime.utcnow)
+                           default=func.current_timestamp())
     last_edit = db.Column(db.DateTime, nullable=False,
-                          default=datetime.utcnow, onupdate=datetime.utcnow)
+                          default=func.now(), onupdate=func.current_timestamp())
     is_edited = db.Column(db.Boolean, default=False)

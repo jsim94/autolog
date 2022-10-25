@@ -67,5 +67,6 @@ def edit():
 
 
 @bp.route('/following')
+@login_required
 def show_following():
     return render_template('profile_following.html')
