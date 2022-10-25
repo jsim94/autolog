@@ -28,7 +28,7 @@ def show(username):
     if not g.user:
         abort(404)
     # return 403 is profile is private and the current_user is not the owner
-    if g.user.private == 'PRIVATE' and g.owner is False:
+    if g.user.private.value == 'PRIVATE' and g.owner is False:
         abort(404)
     return render_template('profile.html')
 
