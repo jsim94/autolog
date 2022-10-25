@@ -141,11 +141,10 @@ def edit(project_id):
     if form.validate_on_submit():
         data = form.data.copy()
         data.pop('csrf_token', None)
-        try:
-            Project.edit(id=project_id, keys=data)
-        except NoResultFound:
-            abort(404)
+
+        g.project.edit(keys=data)
         flash('Project Successfully edited', 'info')
+
         return redirect(url_for('project.show', project_id=project_id))
 
     return render_template('project_edit.html', form=form, user=current_user)
@@ -205,7 +204,7 @@ def delete_picture(project_id, picture_id):
     '''Route to remove a picture from a users project'''
     try:
         image = ProjectPicture.get_by_id(id=picture_id)
-        ProjectPicture.delete(obj=image)
+        image.delete()
         delete_image_file(
             fn=image.filename,
             path=os.path.join(
@@ -268,10 +267,8 @@ def edit_update(project_id, update_id):
     if form.validate_on_submit():
         title = form.title.data
         content = form.content.data
-        try:
-            Update.edit(id=update_id, title=title, content=content)
-        except:
-            raise
+        update = Update.get_by_id(update_id)
+        update.edit(title=title, content=content)
     else:
         flash('Error Occurred', 'error')
     return redirect(url_for('project.show', project_id=project_id))
@@ -282,9 +279,10 @@ def edit_update(project_id, update_id):
 def delete_update(project_id, update_id):
     '''Route to delete an update from a users project'''
     try:
-        Update.delete(id=update_id)
+        update = Update.get_by_id(update_id)
     except NoResultFound:
         abort(404)
+    update.delete()
     return redirect(url_for('project.show', project_id=project_id))
 
 
@@ -313,19 +311,19 @@ def edit_comment(project_id, comment_id):
     '''Route to edit a comment'''
     form = CommentForm()
 
-    comment = Comment.get_by_id(comment_id)
+    try:
+        comment = Comment.get_by_id(comment_id)
+    except NoResultFound:
+        abort(404)
 
     if not current_user == comment.user:
         abort(403)
 
     if form.validate_on_submit():
         content = form.content.data
+        comment.edit(content=content)
+        flash('Comment updated', 'info')
 
-        new_comment = Comment.edit(obj=comment, content=content)
-        if new_comment:
-            flash('Comment updated', 'info')
-        else:
-            flash('Error editing comment', 'error')
         return redirect(url_for('project.show', project_id=project_id))
     abort(400)
 
@@ -340,7 +338,7 @@ def delete_comment(project_id, comment_id):
         abort(404)
 
     if g.owner or current_user == comment.user:
-        Comment.delete(obj=comment)
+        comment.delete()
     return redirect(url_for('project.show', project_id=project_id))
 
 
@@ -348,6 +346,6 @@ def delete_comment(project_id, comment_id):
 @owner_required
 def delete(project_id):
     '''Deletes project from database'''
-    Project.delete(obj=g.project)
+    g.project.delete()
     flash('Project deleted', 'info')
     return redirect(url_for('profile.show', username=g.project.user.username))

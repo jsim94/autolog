@@ -29,7 +29,7 @@ def show(username):
         abort(404)
     # return 403 is profile is private and the current_user is not the owner
     if g.user.private == 'PRIVATE' and g.owner is False:
-        abort(403)
+        abort(404)
     return render_template('profile.html')
 
 
@@ -48,17 +48,15 @@ def edit():
 
         if User.authenticate(user=current_user, password=old_password):
             try:
-                user = User.edit(
-                    obj=current_user,
+                current_user.edit(
                     username=username,
                     password=new_password,
                     email=email,
                     private=private
                 )
-                if user:
-                    flash('Profile successfully updated', 'info')
-                    return redirect(url_for('profile.show', username=user.username))
-                flash('Error occured', 'error')
+                flash('Profile successfully updated', 'info')
+                return redirect(url_for('profile.show', username=current_user.username))
+
             except IntegrityError:
                 flash('Username or email already taken', 'danger')
         else:

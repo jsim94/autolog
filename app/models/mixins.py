@@ -30,48 +30,36 @@ class base(object):
             return result
         raise NoResultFound()
 
-    @classmethod
-    def edit(cls, obj=None, id=None, keys=None, **kwargs):
-        '''Edits an exising row in a table with passed args. Returns the edited object
+    def edit(self, keys=None, **kwargs):
+        '''Edits an exising row in a table with passed args and commits. Returns the edited object
 
-        :param obj: 
-            Accepts an object to be modified. Can be called from an instance method override or classmethod
-        :param id: 
-            The id of the object to be modified. Must be called as a class method
         :param keys: 
             A dict of key values to update the object with with.
         :param **kwargs:
             passed attributes to update on the object.        
         '''
-        if not obj:
-            obj = cls.get_by_id(id)
+        def set_attrs(values):
+            for key, value in values.items():
+                if key in self.__table__.columns:
+                    if value is not None:
+                        setattr(self, key, value)
+                else:
+                    msg = 'No attr \'' + key + '\' found in table columns'
+                    raise AttributeError(msg)
+        if keys:
+            set_attrs(keys)
+        if kwargs:
+            set_attrs(kwargs)
 
-        for key, value in keys.items() if keys else kwargs.items():
-            if key in cls.__table__.columns:
-                if value is not None:
-                    setattr(obj, key, value)
-            else:
-                msg = 'No attr \'' + key + '\' found in table columns'
-                raise AttributeError(msg)
-        if 'is_edited' in cls.__table__.columns:
-            obj.is_edited = True
-        cls._commit()
-        return obj
+        if 'is_edited' in self.__table__.columns:
+            self.is_edited = True
+        self._commit()
+        return self
 
-    @classmethod
-    def delete(cls, obj=None, id=None):
-        '''Deletes a row from table
-
-        :param obj: 
-            Accepts an object to be deleted. Can be called from an instance method override
-        :param id: 
-            The id of the object to be deleted. Must be called as a class method
-        '''
-        if not obj:
-            obj = cls.get_by_id(id)
-
-        db.session.delete(obj)
-        cls._commit()
+    def delete(self):
+        '''Deletes a row from table and commits'''
+        db.session.delete(self)
+        self._commit()
 
 
 class timestamps(object):

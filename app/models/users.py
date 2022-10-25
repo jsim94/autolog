@@ -97,13 +97,17 @@ class User(UserMixin, base, db.Model):
         cls._commit()
         return user
 
-    @classmethod
-    def edit(cls, obj=None, username=None, password=None, email=None, private=None):
+    def edit(self, username=None, password=None, email=None, private=None):
         '''Edits user object. Returns user'''
-        hashed_password = cls._generate_password(
+        hashed_password = self._generate_password(
             password=password) if password else None
 
-        return super().edit(obj=obj, username=username, password=hashed_password, email=email)
+        return super().edit(
+            username=username,
+            password=hashed_password,
+            email=email,
+            private=private
+        )
 
 
 class Follow(db.Model):
