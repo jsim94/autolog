@@ -59,6 +59,8 @@ def edit():
 
             except IntegrityError:
                 flash('Username or email already taken', 'danger')
+            except AssertionError:
+                flash('Password must be between 8 and 32 characters', 'danger')
         else:
             flash('Wrong password', 'warning')
     return render_template('profile_edit.html', form=form, user=current_user)

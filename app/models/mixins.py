@@ -41,7 +41,7 @@ class base(object):
         def set_attrs(values):
             for key, value in values.items():
                 if key in self.__table__.columns:
-                    if value is not None:
+                    if bool(value):
                         setattr(self, key, value)
                 else:
                     msg = 'No attr \'' + key + '\' found in table columns'

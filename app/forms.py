@@ -2,7 +2,7 @@
 
 from flask_wtf import FlaskForm
 from wtforms import HiddenField, SelectField, StringField, IntegerField, DecimalField, PasswordField, RadioField, MultipleFileField
-from wtforms.validators import InputRequired, Email, EqualTo, Length
+from wtforms.validators import InputRequired, Optional, Email, EqualTo, Length
 from wtforms.widgets import TextArea, TextInput
 
 from app.models.enums import Drivetrain, PrivacyStatus
@@ -30,7 +30,15 @@ class SignupForm(FlaskForm):
 
 class UserEdit(SignupForm, FlaskForm):
     '''Form for user update'''
-    old_password = PasswordField('Old Password')
+    email = StringField('E-mail', validators=[Optional(), Email()])
+    username = StringField('Username', validators=[
+                           Optional(), Length(min=4, max=20)])
+    password = PasswordField('New Password', validators=[Optional(), Length(min=8, max=32), EqualTo(
+        'confirm', message='Passwords must match')])
+    confirm = PasswordField('Repeat New Password', validators=[Optional(),
+                            Length(min=8, max=32)])
+    old_password = PasswordField(
+        'Current Password', validators=[InputRequired()])
     private = RadioField('Visibility', default='PUBLIC',
                          choices=PrivacyStatus.choices)
 

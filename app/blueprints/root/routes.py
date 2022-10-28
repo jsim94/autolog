@@ -1,5 +1,4 @@
 # app > routes.py
-
 from functools import wraps
 
 from sqlalchemy.exc import IntegrityError, NoResultFound
@@ -87,8 +86,12 @@ def login():
     form = LoginForm()
 
     if form.validate_on_submit():
-        user = User.authenticate(username=form.username.data,
-                                 password=form.password.data)
+        try:
+            user = User.authenticate(username=form.username.data,
+                                     password=form.password.data)
+        except NoResultFound:
+            user = None
+
         if user:
             login_user(user, remember='remember')
             return redirect(url_for('profile.show', username=user.username))
@@ -103,5 +106,6 @@ def login():
 def logout():
     '''Log out user'''
     logout_user()
+    setattr(g, 'current_user', None)
     flash('Successfully logged out')
     return redirect(url_for('root.homepage'))

@@ -11,7 +11,9 @@
           {% for category, message in get_flashed_messages(with_categories=True) %}
           <div class="alert alert-{{ category }}">{{ message }}</div>
           {% endfor %}
-          <h1>Modlog</h1>
+          <a href="/" class="text-decoration-none text-dark">
+            <h1>Modlog</h1>
+          </a>
           {% block subcontent %}
           {% endblock %}
         </div>

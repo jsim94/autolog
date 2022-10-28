@@ -23,8 +23,7 @@ def get_project_object(endpoint, values):
         abort(404)
     except KeyError:
         return
-
-    if g.project.private == 'PRIVATE' and not g.owner:
+    if g.project.private.value == 'PRIVATE' and not g.owner:
         abort(403)
 
 
@@ -77,9 +76,6 @@ def get_modal_form(project_id):
 @bp.route('/<project_id>')
 def show(project_id):
     '''Retreives the page for the project car if found and if the requesting client has access to the page.'''
-
-    if g.project.private.value == 'PRIVATE' and not g.owner:
-        abort(404)
 
     try:
         comment_form = CommentForm(
