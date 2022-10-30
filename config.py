@@ -29,7 +29,7 @@ class ProdConfig(DefaultConfig):
     SECRET_KEY = environ.get(
         'SECRET_KEY')
     SQLALCHEMY_DATABASE_URI = (
-        environ.get('DATABASE_URL'))
+        environ.get('DATABASE_URL').replace("postgres://", "postgresql://", 1))
 
 
 class DevConfig(DefaultConfig):
