@@ -267,7 +267,7 @@
       <li class="list-group-item p-1">
         <form action="{{ url_for('project.new_comment', project_id=g.project.id) }}" method="post">
           {{ comment_form.hidden_tag() }}
-          {{ comment_form.user_id()}}
+          <!-- {# comment_form.user_id()#} -->
           <div class="input-group">
             {{ comment_form.content(class='form-control')}}
             <input class="btn btn-outline-primary" type="submit" value="Submit">

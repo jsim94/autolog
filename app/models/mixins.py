@@ -1,6 +1,5 @@
 # app > models > mixins.py
 from datetime import datetime
-from sqlalchemy.sql import func
 from sqlalchemy.exc import NoResultFound
 
 from . import db
@@ -65,7 +64,7 @@ class base(object):
 class timestamps(object):
     '''Mixin for creation date and auto last_edit date columns'''
     created_at = db.Column(db.DateTime, nullable=False,
-                           default=func.current_timestamp())
+                           default=datetime.utcnow)
     last_edit = db.Column(db.DateTime, nullable=False,
-                          default=func.now(), onupdate=func.current_timestamp())
+                          default=datetime.utcnow, onupdate=datetime.utcnow)
     is_edited = db.Column(db.Boolean, default=False)

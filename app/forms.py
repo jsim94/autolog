@@ -89,4 +89,3 @@ class CommentForm(FlaskForm):
     '''Form for adding a comment to a project'''
     content = StringField('', validators=[
                           Length(max=250), InputRequired()], render_kw={'placeholder': 'Comment', 'autocomplete': 'off'})
-    user_id = HiddenField('user_id')

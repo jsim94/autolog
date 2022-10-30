@@ -289,11 +289,10 @@ def new_comment(project_id):
     form = CommentForm()
 
     if form.validate_on_submit():
-        user_id = form.user_id.data
         content = form.content.data
 
         comment = Comment.create(
-            user_id=user_id, project_id=project_id, content=content)
+            user_id=current_user.id, project_id=project_id, content=content)
 
         if not comment:
             flash('Error adding comment', 'error')
@@ -335,6 +334,8 @@ def delete_comment(project_id, comment_id):
 
     if g.owner or current_user == comment.user:
         comment.delete()
+    else:
+        abort(403)
     return redirect(url_for('project.show', project_id=project_id))
 
 
