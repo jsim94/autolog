@@ -28,8 +28,6 @@ class User(UserMixin, base, db.Model):
     email = db.Column(db.Text, unique=True, nullable=False)
     password = db.Column(db.String(60), CheckConstraint(
         "LENGTH(password) >= 60"), nullable=False)
-    created_at = db.Column(db.DateTime, nullable=False,
-                           default=datetime.utcnow())
     last_login = db.Column(
         db.DateTime, nullable=False, default=datetime.utcnow())
     private = db.Column(ENUM(PrivacyStatus),
