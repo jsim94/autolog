@@ -22,6 +22,6 @@ Upon logging in, the user is shown their profile page where they have a list of 
 
 This app uses https://www.carqueryapi.com/ to gain relevant data tied to users' cars for more information and interactivity. It provides more in depth data about the vehicle such as drivetrain specs, etc. Unfortunately this API is quite out of date. Data for years after 2019 is a replica of 2019 data.
 
-# DB Schema##
+# DB Schema
 
 ![DB schema](/.github/schema.png)
