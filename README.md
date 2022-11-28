@@ -2,6 +2,9 @@
 
 https://jsime-modlog.herokuapp.com
 
+Example of a project page:
+![Project Example](/.github/project_example.png)
+
 ## What is the goal?
 
 This site is a place for users to create pages that represent their project car. Users are be able to keep a log of their project cars as well as upload pictures and share the pages with other users.
