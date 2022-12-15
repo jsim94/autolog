@@ -1,6 +1,9 @@
 """Flask configuration variables."""
 from os import environ
 from enum import Enum
+from dotenv import load_dotenv
+
+load_dotenv()
 
 
 class DefaultConfig(object):
